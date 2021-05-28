@@ -1,66 +1,36 @@
 package pink.zak.api.wavybot.models.user;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Data;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.lang.NonNull;
 
 import java.util.UUID;
 
+@Data
+@Document
 public class WavyUser {
     @Id
+    @NonNull
     private UUID uuid;
+    @Indexed(unique = true)
+    @NonNull
     private String username;
     private String spotifyId;
     private String spotifyDisplayName;
     private long lastUpdate;
 
-    public void setUuid(@NonNull UUID uuid) {
+    public WavyUser(@NonNull UUID uuid, @NonNull String username, String spotifyId, String spotifyDisplayName) {
         this.uuid = uuid;
-    }
-
-    @NonNull
-    public UUID getUuid() {
-        return this.uuid;
-    }
-
-    @NonNull
-    public String getUsername() {
-        return this.username;
-    }
-
-    public void setUsername(@NonNull String username) {
         this.username = username;
+        this.spotifyId = spotifyId;
+        this.spotifyDisplayName = spotifyDisplayName;
+        this.lastUpdate = System.currentTimeMillis();
     }
 
     @NonNull
-    @JsonIgnore
     public String getProfileLink() {
         return "https://wavy.fm/user/".concat(this.username).concat("/");
-    }
-
-    @NonNull
-    public String getSpotifyId() {
-        return this.spotifyId;
-    }
-
-    public void setSpotifyId(@NonNull String spotifyId) {
-        this.spotifyId = spotifyId;
-    }
-
-    @NonNull
-    public String getSpotifyDisplayName() {
-        return this.spotifyDisplayName;
-    }
-
-    public void setSpotifyDisplayName(@NonNull String spotifyDisplayName) {
-        this.spotifyDisplayName = spotifyDisplayName;
-    }
-
-    public long getLastUpdate() {
-        return this.lastUpdate;
-    }
-
-    public void setLastUpdate(long lastUpdate) {
-        this.lastUpdate = lastUpdate;
     }
 }

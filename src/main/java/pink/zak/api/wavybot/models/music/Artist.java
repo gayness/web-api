@@ -2,9 +2,11 @@ package pink.zak.api.wavybot.models.music;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Set;
 
+@Document
 public class Artist {
     @Id
     private String id;

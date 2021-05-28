@@ -31,6 +31,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("com.google.guava:guava:30.1.1-jre")
+    implementation("se.michaelthelin.spotify:spotify-web-api-java:6.5.4")
 
     developmentOnly("org.springframework.boot:spring-boot-devtools")
 

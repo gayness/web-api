@@ -3,13 +3,15 @@ package pink.zak.api.wavybot.models.music.album;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.wrapper.spotify.enums.AlbumType;
 import com.wrapper.spotify.enums.ReleaseDatePrecision;
-import org.mongojack.Id;
-import pink.zak.discord.wavybot.models.music.SpotifyImage;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import pink.zak.api.wavybot.models.music.SpotifyImage;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+@Document
 public class Album {
     @Id
     private String id;
