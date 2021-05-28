@@ -1,9 +1,9 @@
 package pink.zak.api.wavybot.models.music;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.NonNull;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Set;
@@ -22,7 +22,7 @@ public class Artist {
     private Set<SpotifyImage> artistImages;
     private String[] genres;
 
-    @JsonIgnore
+    @Transient
     public boolean isRich() {
         return this.artistImages != null;
     }

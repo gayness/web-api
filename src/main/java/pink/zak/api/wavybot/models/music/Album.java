@@ -1,11 +1,11 @@
 package pink.zak.api.wavybot.models.music;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.wrapper.spotify.enums.AlbumType;
 import com.wrapper.spotify.enums.ReleaseDatePrecision;
 import lombok.Data;
 import lombok.NonNull;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
@@ -34,7 +34,7 @@ public class Album {
     private String[] genres;
     private List<String> trackIds;
 
-    @JsonIgnore
+    @Transient
     public boolean isRich() {
         return this.albumType != null;
     }
