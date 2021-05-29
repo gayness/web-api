@@ -1,6 +1,7 @@
 package pink.zak.api.wavybot.models.music;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
@@ -10,6 +11,7 @@ import java.util.Set;
 
 @Data
 @Document
+@NoArgsConstructor
 public class Artist {
     @Id
     @NonNull
@@ -21,6 +23,11 @@ public class Artist {
     private long lastSpotifyUpdate;
     private Set<SpotifyImage> artistImages;
     private String[] genres;
+
+    public Artist(@NonNull String id, @NonNull String name) {
+        this.id = id;
+        this.name = name;
+    }
 
     @Transient
     public boolean isRich() {
