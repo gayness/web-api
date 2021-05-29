@@ -6,7 +6,6 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.lang.NonNull;
-import pink.zak.api.wavybot.models.user.User;
 
 import java.util.Set;
 
@@ -17,7 +16,7 @@ public class Server {
     private long serverId;
     @NonNull
     @DBRef
-    private Set<User> linkedUsers;
+    private Set<Long> linkedUsers;
 
     public Server(long serverId) {
         this.serverId = serverId;

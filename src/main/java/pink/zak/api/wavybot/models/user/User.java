@@ -18,7 +18,7 @@ public class User {
     @NonNull
     private MusicData musicData;
     @Nullable
-    @DBRef
+    @DBRef(lazy = true)
     private WavyUser wavyUser;
 
     public User(long discordId) {
