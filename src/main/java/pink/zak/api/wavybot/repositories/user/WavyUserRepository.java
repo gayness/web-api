@@ -10,5 +10,5 @@ import java.util.UUID;
 @Repository
 public interface WavyUserRepository extends MongoRepository<WavyUser, UUID> {
 
-    WavyUser findByUserIs(User user);
+    WavyUser findByUserIdIs(User user);
 }

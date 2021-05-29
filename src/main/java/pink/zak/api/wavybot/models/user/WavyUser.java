@@ -3,7 +3,6 @@ package pink.zak.api.wavybot.models.user;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
-import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.lang.NonNull;
 
@@ -14,7 +13,7 @@ import java.util.UUID;
 public class WavyUser {
     @Id
     @NonNull
-    private UUID uuid;
+    private UUID wavyUuid;
     @Indexed(unique = true)
     @NonNull
     private String username;
@@ -22,15 +21,16 @@ public class WavyUser {
     private String spotifyDisplayName;
     private long lastUpdate;
 
-    @DBRef(lazy = true)
-    private User user;
+    private long userId;
 
-    public WavyUser(@NonNull UUID uuid, @NonNull String username, String spotifyId, String spotifyDisplayName) {
-        this.uuid = uuid;
+    public WavyUser(@NonNull UUID wavyUuid, @NonNull String username, String spotifyId, String spotifyDisplayName, long userId) {
+        this.wavyUuid = wavyUuid;
         this.username = username;
         this.spotifyId = spotifyId;
         this.spotifyDisplayName = spotifyDisplayName;
         this.lastUpdate = System.currentTimeMillis();
+
+        this.userId = userId;
     }
 
     @NonNull

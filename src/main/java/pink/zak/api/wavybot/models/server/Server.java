@@ -3,7 +3,6 @@ package pink.zak.api.wavybot.models.server;
 import com.google.common.collect.Sets;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.lang.NonNull;
 
@@ -15,7 +14,6 @@ public class Server {
     @Id
     private long serverId;
     @NonNull
-    @DBRef
     private Set<Long> linkedUsers;
 
     public Server(long serverId) {
