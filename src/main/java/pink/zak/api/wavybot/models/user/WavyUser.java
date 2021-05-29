@@ -1,6 +1,7 @@
 package pink.zak.api.wavybot.models.user;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -10,6 +11,7 @@ import java.util.UUID;
 
 @Data
 @Document
+@NoArgsConstructor
 public class WavyUser {
     @Id
     @NonNull
@@ -31,10 +33,5 @@ public class WavyUser {
         this.lastUpdate = System.currentTimeMillis();
 
         this.userId = userId;
-    }
-
-    @NonNull
-    public String getProfileLink() {
-        return "https://wavy.fm/user/".concat(this.username).concat("/");
     }
 }
