@@ -19,7 +19,7 @@ public class UserController {
     }
 
     @GetMapping("/get")
-    public User getUserById(@PathVariable long discordId) {
-        return this.userService.getUserById(discordId);
+    public User getUserById(@PathVariable long discordId, boolean createIfAbsent) {
+        return this.userService.getUserById(discordId, createIfAbsent);
     }
 }

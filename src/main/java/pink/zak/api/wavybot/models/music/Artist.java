@@ -1,5 +1,6 @@
 package pink.zak.api.wavybot.models.music;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -30,6 +31,7 @@ public class Artist {
     }
 
     @Transient
+    @JsonIgnore
     public boolean isRich() {
         return this.artistImages != null;
     }

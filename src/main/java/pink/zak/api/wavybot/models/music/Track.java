@@ -1,5 +1,6 @@
 package pink.zak.api.wavybot.models.music;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -40,6 +41,7 @@ public class Track {
     }
 
     @Transient
+    @JsonIgnore
     public boolean isRich() {
         return this.previewUrl != null;
     }

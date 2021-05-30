@@ -2,8 +2,8 @@ package pink.zak.api.wavybot.repositories.music;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
-import pink.zak.api.wavybot.models.music.Album;
+import pink.zak.api.wavybot.models.music.Artist;
 
 @Repository
-public interface ArtistRepository extends MongoRepository<Album, String> {
+public interface ArtistRepository extends MongoRepository<Artist, String> {
 }

@@ -1,5 +1,6 @@
 package pink.zak.api.wavybot.models.music;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.wrapper.spotify.enums.AlbumType;
 import com.wrapper.spotify.enums.ReleaseDatePrecision;
 import lombok.Data;
@@ -44,6 +45,7 @@ public class Album {
     }
 
     @Transient
+    @JsonIgnore
     public boolean isRich() {
         return this.albumType != null;
     }
