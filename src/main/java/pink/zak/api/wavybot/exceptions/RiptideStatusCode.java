@@ -15,11 +15,11 @@ public enum RiptideStatusCode {
     }
 
     public ResponseStatusException getException(Object... values) {
-        return new ResponseStatusException(this.statusCode, String.format(this.description, values), null);
+        return new RiptideStatusException(this, String.format(this.description, values), null);
     }
 
     public ResponseStatusException getException(Throwable throwable, Object... values) {
-        return new ResponseStatusException(this.statusCode, String.format(this.description, values), throwable);
+        return new RiptideStatusException(this, String.format(this.description, values), throwable);
     }
 
     public int getStatusCode() {
