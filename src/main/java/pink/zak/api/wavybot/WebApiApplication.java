@@ -5,6 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import pink.zak.api.wavybot.models.server.Server;
 import pink.zak.api.wavybot.models.user.User;
 import pink.zak.api.wavybot.models.user.WavyUser;
@@ -14,6 +15,7 @@ import java.util.UUID;
 
 @SpringBootApplication
 @EnableCaching
+@EnableScheduling
 public class WebApiApplication {
 
     public static void main(String[] args) {
