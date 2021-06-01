@@ -18,8 +18,7 @@ public class WebApiApplication {
 
     public static void main(String[] args) {
         ApplicationContext context = SpringApplication.run(WebApiApplication.class, args);
-        test(context);
-
+        //test(context);
     }
 
     public static void test(ApplicationContext context) {

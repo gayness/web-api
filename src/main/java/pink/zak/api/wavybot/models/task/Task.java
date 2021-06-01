@@ -23,6 +23,12 @@ public class Task<T> {
     @Transient
     private CompletableFuture<T> future;
 
+    public static <T> Task<T> create() {
+        Task<T> task = new Task<>();
+        task.setTaskId(UUID.randomUUID());
+        return task;
+    }
+
     public void updateProgress(IntUnaryOperator updateFunction) {
         this.progress.updateAndGet(updateFunction);
     }

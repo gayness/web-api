@@ -14,7 +14,6 @@ import pink.zak.api.wavybot.models.dto.wavy.music.WavyTrackDto;
 import pink.zak.api.wavybot.models.dto.wavy.music.album.WavyAlbumDto;
 import pink.zak.api.wavybot.models.dto.wavy.music.listens.WavyListenDto;
 import pink.zak.api.wavybot.models.task.Task;
-import pink.zak.api.wavybot.models.task.TaskResponse;
 import pink.zak.api.wavybot.models.user.User;
 import pink.zak.api.wavybot.models.user.WavyUser;
 import pink.zak.api.wavybot.models.user.music.MusicData;
@@ -67,7 +66,7 @@ public class UserService {
         this.userRepository.save(user);
     }
 
-    public TaskResponse linkUser(String wavyUsername, long discordId) throws RiptideStatusException {
+    public Task<Set<WavyListenDto>> linkUser(String wavyUsername, long discordId) throws RiptideStatusException {
         final WavyUser[] testWavyUser = {this.wavyUserRepository.findByUsernameIsIgnoreCase(wavyUsername)};
         if (testWavyUser[0] != null && testWavyUser[0].getUserId() > 1)
             throw RiptideStatusCode.WAVY_ALREADY_LINKED.getException();
@@ -86,8 +85,7 @@ public class UserService {
                 this.wavyUserRepository.save(wavyUser);
                 user.setWavyUser(wavyUser);
 
-                Task<?> task = this.addAllListensForUser(user);
-                return task.toResponse();
+                return this.addAllListensForUser(user);
             }
         }).exceptionally(ex -> {
             ex.printStackTrace();

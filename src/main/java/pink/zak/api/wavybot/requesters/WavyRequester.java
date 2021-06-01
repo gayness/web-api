@@ -16,6 +16,7 @@ import pink.zak.api.wavybot.models.dto.wavy.music.listens.WavyListenDto;
 import pink.zak.api.wavybot.models.dto.wavy.music.listens.WavyListenPage;
 import pink.zak.api.wavybot.models.dto.wavy.user.WavyUserDto;
 import pink.zak.api.wavybot.models.task.Task;
+import pink.zak.api.wavybot.services.TaskService;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -29,20 +30,23 @@ public class WavyRequester {
     private final ModelBuilder modelBuilder;
     private final OkHttpClient httpClient = new OkHttpClient();
     private final Executor executor;
+    private final TaskService taskService;
 
     private static final String SONG_HISTORY_BASE_URL = "https://wavy.fm/api/internal/legacy/profile/listens/%s?live=false&page=%s&size=100";
     private static final String SONG_HISTORY_SINCE_BASE_URL = "https://wavy.fm/api/internal/legacy/profile/listens/%s?live=false&page=%s&since=%s&size=100";
     private static final String PROFILE_DATA_BASE_URL = "https://wavy.fm/api/internal/legacy/profiles?username=%s";
 
     @Autowired
-    public WavyRequester(ModelBuilder modelBuilder, Executor executor) {
+    public WavyRequester(ModelBuilder modelBuilder, Executor executor, TaskService taskService) {
         this.modelBuilder = modelBuilder;
         this.executor = executor;
+        this.taskService = taskService;
     }
 
     @NonNull
     @Async
     public ListenableFuture<WavyUserDto> retrieveWavyUser(@NonNull String username) {
+        System.out.println("Getting wavy user");
         Request request = new Request.Builder()
                 .url(String.format(PROFILE_DATA_BASE_URL, username))
                 .build();
@@ -58,7 +62,7 @@ public class WavyRequester {
     }
 
     public Task<Set<WavyListenDto>> retrieveAllListens(UUID uuid) {
-        Task<Set<WavyListenDto>> task = new Task<>();
+        Task<Set<WavyListenDto>> task = Task.create();
         task.setFuture(CompletableFuture.supplyAsync(() -> {
             Set<WavyListenDto> listens = Sets.newConcurrentHashSet();
             this.retrieveListenPage(uuid, 0).thenAccept(wavyListenPage -> {
@@ -80,6 +84,7 @@ public class WavyRequester {
             }).join();
             return listens;
         }, this.executor));
+        this.taskService.addTask(task);
         return task;
     }
 
@@ -101,20 +106,20 @@ public class WavyRequester {
     }
 
     public Task<Set<WavyListenDto>> retrieveListensSince(UUID uuid, long since) {
-        Task<Set<WavyListenDto>> taskStatus = new Task<>();
-        taskStatus.setFuture(CompletableFuture.supplyAsync(() -> {
+        Task<Set<WavyListenDto>> task = Task.create();
+        task.setFuture(CompletableFuture.supplyAsync(() -> {
             Set<WavyListenDto> listens = Sets.newConcurrentHashSet();
             this.retrieveListensSincePage(uuid, 0, since).thenAccept(wavyListenPage -> {
                 listens.addAll(wavyListenPage.getTracks());
                 int totalTracks = wavyListenPage.getTotalTracks();
-                taskStatus.setRequiredProgress(totalTracks);
-                taskStatus.updateProgress(current -> current + wavyListenPage.getTracks().size());
+                task.setRequiredProgress(totalTracks);
+                task.updateProgress(current -> current + wavyListenPage.getTracks().size());
                 if (totalTracks > 100) {
                     int requiredPages = (int) Math.ceil(totalTracks / 100.0);
                     Set<CompletableFuture<?>> futures = new HashSet<>();
                     for (int page = 1; page <= requiredPages; page++) {
                         futures.add(this.retrieveListensSincePage(uuid, page, since).thenAccept(wavyPage -> {
-                            taskStatus.updateProgress(current -> current + wavyPage.getTracks().size());
+                            task.updateProgress(current -> current + wavyPage.getTracks().size());
                             listens.addAll(wavyPage.getTracks());
                         }));
                     }
@@ -123,7 +128,8 @@ public class WavyRequester {
             }).join();
             return listens;
         }, this.executor));
-        return taskStatus;
+        this.taskService.addTask(task);
+        return task;
     }
 
     public CompletableFuture<WavyListenPage> retrieveListensSincePage(UUID uuid, int page, long since) {
