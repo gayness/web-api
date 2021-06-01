@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import pink.zak.api.wavybot.models.dto.riptide.UserLinkDto;
-import pink.zak.api.wavybot.models.task.TaskResponse;
+import pink.zak.api.wavybot.models.task.NewTaskResponse;
 import pink.zak.api.wavybot.models.user.User;
 import pink.zak.api.wavybot.services.UserService;
 
@@ -28,14 +28,14 @@ public class UserController {
     }
 
     @PostMapping("/updateListens")
-    public TaskResponse updateUserListens(@PathVariable long discordId) {
+    public NewTaskResponse updateUserListens(@PathVariable long discordId) {
         System.out.println("BRRRRRRR");
         User user = this.userService.getUserById(discordId, false);
         return this.userService.updateUserListens(user).toResponse();
     }
 
     @PostMapping("/linkWavy")
-    public TaskResponse linkWavy(@PathVariable long discordId, @RequestBody UserLinkDto userLinkDto) {
+    public NewTaskResponse linkWavy(@PathVariable long discordId, @RequestBody UserLinkDto userLinkDto) {
         System.out.println("BRRRRRRR");
         return this.userService.linkUser(userLinkDto.getUsername(), discordId).toResponse();
     }

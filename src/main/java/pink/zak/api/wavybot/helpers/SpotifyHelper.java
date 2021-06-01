@@ -149,7 +149,7 @@ public class SpotifyHelper {
     }
 
     @Scheduled(fixedRate = 200, initialDelay = 5000)
-    private void startQueueChecker() {
+    protected void checkQueue() {
         int bulkRequestTracksCount = this.bulkRequestTracks(true);
         if (bulkRequestTracksCount < 20 // there is not a full tracks bulk request
                 && this.bulkRequestAlbums() <= 0 // an album request was not done

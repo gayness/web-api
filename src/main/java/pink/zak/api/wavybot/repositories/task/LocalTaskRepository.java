@@ -8,6 +8,7 @@ import pink.zak.api.wavybot.models.task.Task;
 
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Repository
 public class LocalTaskRepository {
@@ -25,11 +26,14 @@ public class LocalTaskRepository {
     }
 
     @Scheduled(fixedRate = 500)
-    private void updateDatabase() {
-        this.redisTaskRepository.saveAll(this.activeTasks.values());
+    protected void updateDatabase() {
+        System.out.println("Update database called. Saving all  : " + this.activeTasks);
+        this.redisTaskRepository.saveAll(this.activeTasks.values().stream().map(Task::toRedisTask).collect(Collectors.toSet()));
         for (Task<?> task : this.activeTasks.values())
-            if (task.isCompleted())
+            if (task.isCompleted() && (System.currentTimeMillis() - task.getCreationTime() > 10000 || task.getRequiredProgress() > 0)) {
                 this.activeTasks.remove(task.getTaskId());
+                System.out.println("Removing task ID from local repo");
+            }
     }
 
 }

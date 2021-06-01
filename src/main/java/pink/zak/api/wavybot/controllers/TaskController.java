@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import pink.zak.api.wavybot.models.task.RedisTask;
 import pink.zak.api.wavybot.models.task.Task;
 import pink.zak.api.wavybot.services.TaskService;
 
@@ -21,7 +22,7 @@ public class TaskController {
     }
 
     @GetMapping("/get")
-    public Task<?> getTask(@PathVariable UUID uuid) {
+    public RedisTask getTask(@PathVariable UUID uuid) {
         return this.taskService.getTaskById(uuid);
     }
 }
