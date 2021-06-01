@@ -8,7 +8,6 @@ import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
-import org.springframework.data.redis.serializer.OxmSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
@@ -38,15 +37,15 @@ public class RedisCachingConfig {
     public RedisTemplate<?, ?> redisTemplate(RedisConnectionFactory connectionFactory) {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         RedisSerializer<String> stringSerializer = new StringRedisSerializer();
-        OxmSerializer jdkSerializationRedisSerializer = new OxmSerializer();
+        GenericJackson2JsonRedisSerializer serializer = new GenericJackson2JsonRedisSerializer();
 
         template.setConnectionFactory(connectionFactory);
 
         template.setKeySerializer(stringSerializer);
         template.setHashKeySerializer(stringSerializer);
 
-        template.setValueSerializer(jdkSerializationRedisSerializer);
-        template.setHashValueSerializer(jdkSerializationRedisSerializer);
+        template.setValueSerializer(serializer);
+        template.setHashValueSerializer(serializer);
 
         template.setEnableTransactionSupport(true);
         template.afterPropertiesSet();
