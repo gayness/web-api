@@ -9,14 +9,13 @@ import okhttp3.ResponseBody;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 import org.springframework.util.concurrent.ListenableFuture;
 import pink.zak.api.wavybot.models.builder.ModelBuilder;
 import pink.zak.api.wavybot.models.dto.wavy.music.listens.WavyListenDto;
 import pink.zak.api.wavybot.models.dto.wavy.music.listens.WavyListenPage;
 import pink.zak.api.wavybot.models.dto.wavy.user.WavyUserDto;
-import pink.zak.api.wavybot.utils.TaskStatus;
+import pink.zak.api.wavybot.models.task.Task;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -36,7 +35,7 @@ public class WavyRequester {
     private static final String PROFILE_DATA_BASE_URL = "https://wavy.fm/api/internal/legacy/profiles?username=%s";
 
     @Autowired
-    public WavyRequester(ModelBuilder modelBuilder, ThreadPoolTaskExecutor executor) {
+    public WavyRequester(ModelBuilder modelBuilder, Executor executor) {
         this.modelBuilder = modelBuilder;
         this.executor = executor;
     }
@@ -58,21 +57,21 @@ public class WavyRequester {
         }
     }
 
-    public TaskStatus<Set<WavyListenDto>> retrieveAllListens(UUID uuid) {
-        TaskStatus<Set<WavyListenDto>> taskStatus = new TaskStatus<>();
-        taskStatus.setFuture(CompletableFuture.supplyAsync(() -> {
+    public Task<Set<WavyListenDto>> retrieveAllListens(UUID uuid) {
+        Task<Set<WavyListenDto>> task = new Task<>();
+        task.setFuture(CompletableFuture.supplyAsync(() -> {
             Set<WavyListenDto> listens = Sets.newConcurrentHashSet();
             this.retrieveListenPage(uuid, 0).thenAccept(wavyListenPage -> {
                 listens.addAll(wavyListenPage.getTracks());
                 int totalTracks = wavyListenPage.getTotalTracks();
-                taskStatus.setRequiredProgress(totalTracks);
-                taskStatus.getProgress().updateAndGet(current -> current + wavyListenPage.getTracks().size());
+                task.setRequiredProgress(totalTracks);
+                task.updateProgress(current -> current + wavyListenPage.getTracks().size());
                 if (totalTracks > 100) {
                     int requiredPages = (int) Math.ceil(totalTracks / 100.0);
                     Set<CompletableFuture<?>> futures = new HashSet<>();
                     for (int page = 1; page < requiredPages; page++) {
                         futures.add(this.retrieveListenPage(uuid, page).thenAccept(wavyPage -> {
-                            taskStatus.getProgress().updateAndGet(current -> current + wavyPage.getTracks().size());
+                            task.updateProgress(current -> current + wavyPage.getTracks().size());
                             listens.addAll(wavyPage.getTracks());
                         }));
                     }
@@ -81,7 +80,7 @@ public class WavyRequester {
             }).join();
             return listens;
         }, this.executor));
-        return taskStatus;
+        return task;
     }
 
     public CompletableFuture<WavyListenPage> retrieveListenPage(UUID uuid, int page) {
@@ -101,21 +100,21 @@ public class WavyRequester {
         }, this.executor);
     }
 
-    public TaskStatus<Set<WavyListenDto>> retrieveListensSince(UUID uuid, long since) {
-        TaskStatus<Set<WavyListenDto>> taskStatus = new TaskStatus<>();
+    public Task<Set<WavyListenDto>> retrieveListensSince(UUID uuid, long since) {
+        Task<Set<WavyListenDto>> taskStatus = new Task<>();
         taskStatus.setFuture(CompletableFuture.supplyAsync(() -> {
             Set<WavyListenDto> listens = Sets.newConcurrentHashSet();
             this.retrieveListensSincePage(uuid, 0, since).thenAccept(wavyListenPage -> {
                 listens.addAll(wavyListenPage.getTracks());
                 int totalTracks = wavyListenPage.getTotalTracks();
                 taskStatus.setRequiredProgress(totalTracks);
-                taskStatus.getProgress().updateAndGet(current -> current + wavyListenPage.getTracks().size());
+                taskStatus.updateProgress(current -> current + wavyListenPage.getTracks().size());
                 if (totalTracks > 100) {
                     int requiredPages = (int) Math.ceil(totalTracks / 100.0);
                     Set<CompletableFuture<?>> futures = new HashSet<>();
                     for (int page = 1; page <= requiredPages; page++) {
                         futures.add(this.retrieveListensSincePage(uuid, page, since).thenAccept(wavyPage -> {
-                            taskStatus.getProgress().updateAndGet(current -> current + wavyPage.getTracks().size());
+                            taskStatus.updateProgress(current -> current + wavyPage.getTracks().size());
                             listens.addAll(wavyPage.getTracks());
                         }));
                     }

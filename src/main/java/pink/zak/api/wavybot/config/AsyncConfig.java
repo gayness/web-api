@@ -13,7 +13,7 @@ import java.util.concurrent.ScheduledExecutorService;
 @EnableAsync
 public class AsyncConfig {
 
-    @Bean
+    @Bean("executor")
     public Executor generateExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(5);
@@ -23,11 +23,12 @@ public class AsyncConfig {
         return executor;
     }
 
-    @Bean
+    @Bean("scheduler")
     public ScheduledExecutorService generateScheduler() {
         ThreadPoolTaskScheduler executor = new ThreadPoolTaskScheduler();
         executor.setPoolSize(10);
         executor.setThreadNamePrefix("wb-scheduled-");
+        executor.initialize();
         return executor.getScheduledExecutor();
     }
 }
