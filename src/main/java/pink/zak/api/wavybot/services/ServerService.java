@@ -37,7 +37,7 @@ public class ServerService {
     }
 
     @CachePut("server")
-    public void save(Server server) {
-        this.serverRepository.save(server);
+    public Server save(Server server) {
+        return this.serverRepository.save(server);
     }
 }

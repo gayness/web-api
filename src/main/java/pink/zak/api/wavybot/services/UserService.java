@@ -62,8 +62,8 @@ public class UserService {
     }
 
     @CachePut("user")
-    public void save(User user) {
-        this.userRepository.save(user);
+    public User save(User user) {
+        return this.userRepository.save(user);
     }
 
     public Task<Set<WavyListenDto>> linkUser(String wavyUsername, long discordId) throws RiptideStatusException {

@@ -50,7 +50,7 @@ public class TrackService {
     }
 
     @CachePut("track")
-    public void save(Track track) {
-        this.trackRepository.save(track);
+    public Track save(Track track) {
+        return this.trackRepository.save(track);
     }
 }

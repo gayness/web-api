@@ -50,7 +50,7 @@ public class AlbumService {
     }
 
     @CachePut("album")
-    public void save(Album album) {
-        this.albumRepository.save(album);
+    public Album save(Album album) {
+        return this.albumRepository.save(album);
     }
 }

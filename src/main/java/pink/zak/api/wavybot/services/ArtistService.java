@@ -50,7 +50,7 @@ public class ArtistService {
     }
 
     @CachePut("artist")
-    public void save(Artist artist) {
-        this.artistRepository.save(artist);
+    public Artist save(Artist artist) {
+        return this.artistRepository.save(artist);
     }
 }
