@@ -2,10 +2,12 @@ package pink.zak.api.wavybot.models.user.music;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
 import org.springframework.lang.NonNull;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -13,6 +15,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Data
 @NoArgsConstructor
 public class MusicData {
+    @NonNull
+    @Id
+    private UUID wavyUuid;
+    private long userId;
     @NonNull
     private List<TrackListen> listens;
     @NonNull
@@ -24,13 +30,13 @@ public class MusicData {
     @NonNull
     private Map<Long, SuspiciousDay> suspiciousDays; // The long is the start long of the day
 
-    public MusicData(boolean isNew) {
-        if (isNew) {
-            this.listens = new CopyOnWriteArrayList<>();
-            this.trackPlays = new ConcurrentHashMap<>();
-            this.albumPlays = new ConcurrentHashMap<>();
-            this.artistPlays = new ConcurrentHashMap<>();
-            this.suspiciousDays = new ConcurrentHashMap<>();
-        }
+    public MusicData(@NonNull UUID wavyUuid, long userId) {
+        this.wavyUuid = wavyUuid;
+        this.userId = userId;
+        this.listens = new CopyOnWriteArrayList<>();
+        this.trackPlays = new ConcurrentHashMap<>();
+        this.albumPlays = new ConcurrentHashMap<>();
+        this.artistPlays = new ConcurrentHashMap<>();
+        this.suspiciousDays = new ConcurrentHashMap<>();
     }
 }

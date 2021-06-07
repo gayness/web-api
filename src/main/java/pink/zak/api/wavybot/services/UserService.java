@@ -33,14 +33,18 @@ import java.util.stream.Collectors;
 public class UserService {
     private final UserRepository userRepository;
     private final WavyUserRepository wavyUserRepository;
+    private final WavyUserService wavyUserService;
+    private final MusicDataService musicDataService;
     private final WavyRequester requester;
     private final RedisHelper redisHelper;
     private final ListenHelper listenHelper;
 
     @Autowired
-    public UserService(UserRepository userRepository, WavyUserRepository wavyUserRepository, WavyRequester requester, RedisHelper redisHelper, ListenHelper listenHelper) {
+    public UserService(UserRepository userRepository, WavyUserRepository wavyUserRepository, WavyUserService wavyUserService, MusicDataService musicDataService, WavyRequester requester, RedisHelper redisHelper, ListenHelper listenHelper) {
         this.userRepository = userRepository;
         this.wavyUserRepository = wavyUserRepository;
+        this.wavyUserService = wavyUserService;
+        this.musicDataService = musicDataService;
         this.requester = requester;
         this.redisHelper = redisHelper;
         this.listenHelper = listenHelper;
@@ -61,17 +65,12 @@ public class UserService {
         return this.userRepository.insert(new User(discordId));
     }
 
-    @CachePut("user")
-    public User save(User user) {
-        return this.userRepository.save(user);
-    }
-
     public Task<Set<WavyListenDto>> linkUser(String wavyUsername, long discordId) throws RiptideStatusException {
-        final WavyUser[] testWavyUser = {this.wavyUserRepository.findByUsernameIsIgnoreCase(wavyUsername)};
-        if (testWavyUser[0] != null && testWavyUser[0].getUserId() > 1)
+        WavyUser testWavyUserX = this.wavyUserRepository.findByUsernameIsIgnoreCase(wavyUsername);
+        if (testWavyUserX != null && testWavyUserX.getUserId() > 1)
             throw RiptideStatusCode.WAVY_ALREADY_LINKED.getException();
         User user = this.getUserById(discordId, true);
-        if (user.getWavyUser() != null)
+        if (user.getWavyUuid() != null)
             throw RiptideStatusCode.DISCORD_ALREADY_LINKED.getException();
         return this.requester.retrieveWavyUser(wavyUsername).completable().thenApply(wavyUserDto -> {
             long wavyDiscordId = wavyUserDto.getDiscordId();
@@ -80,10 +79,10 @@ public class UserService {
             } else if (wavyDiscordId != discordId) {
                 throw RiptideStatusCode.WAVY_DISCORD_DOES_NOT_MATCH.getException();
             } else {
-                WavyUser wavyUser = testWavyUser[0] == null ? wavyUserDto.toUser(discordId) : testWavyUser[0];
+                WavyUser wavyUser = testWavyUserX == null ? wavyUserDto.toUser(discordId) : testWavyUserX;
                 wavyUser.setUserId(discordId);
-                this.wavyUserRepository.save(wavyUser);
-                user.setWavyUser(wavyUser);
+                this.wavyUserService.save(wavyUser);
+                user.setWavyUuid(wavyUser.getWavyUuid());
 
                 return this.addAllListensForUser(user);
             }
@@ -94,18 +93,18 @@ public class UserService {
     }
 
     public Task<Set<WavyListenDto>> updateUserListens(User user) {
-        List<TrackListen> listens = user.getMusicData().getListens();
+        List<TrackListen> listens = this.musicDataService.getByDiscordId(user.getDiscordId()).getListens();
         if (listens.isEmpty())
             return this.addAllListensForUser(user);
         Collections.sort(listens);
         long mostRecentListenTimestamp = listens.get(0).getListenTime() + 1000; // Add 1000 as otherwise it'll include the most recent
-        Task<Set<WavyListenDto>> taskStatus = this.requester.retrieveListensSince(user.getWavyUser().getWavyUuid(), mostRecentListenTimestamp);
+        Task<Set<WavyListenDto>> taskStatus = this.requester.retrieveListensSince(user.getWavyUuid(), mostRecentListenTimestamp);
         this.addListens(taskStatus, user, mostRecentListenTimestamp);
         return taskStatus;
     }
 
     public Task<Set<WavyListenDto>> addAllListensForUser(User user) {
-        Task<Set<WavyListenDto>> taskStatus = this.requester.retrieveAllListens(user.getWavyUser().getWavyUuid());
+        Task<Set<WavyListenDto>> taskStatus = this.requester.retrieveAllListens(user.getWavyUuid());
         this.addListens(taskStatus, user, 0);
         return taskStatus;
     }
@@ -113,7 +112,7 @@ public class UserService {
     private void addListens(Task<Set<WavyListenDto>> taskStatus, User user, long previousFetchTime) {
         taskStatus.getFuture().thenAccept(listenDtos -> {
             Set<TrackListen> listens = listenDtos.stream().map(WavyListenDto::toTrackListen).collect(Collectors.toSet());
-            MusicData musicData = user.getMusicData();
+            MusicData musicData = this.musicDataService.getByDiscordId(user.getDiscordId());
             musicData.getListens().addAll(listens);
             listenDtos.stream().map(WavyListenDto::getTrack).map(WavyTrackDto::getId).forEach(id -> {
                 if (musicData.getTrackPlays().containsKey(id))
@@ -135,7 +134,7 @@ public class UserService {
                         musicData.getArtistPlays().put(id, new AtomicInteger(1));
                 }
             });
-            this.save(user);
+            this.musicDataService.save(musicData);
             listenDtos.forEach(this.listenHelper::processListen);
             this.redisHelper.updateLeaderboards(user);
         });

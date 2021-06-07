@@ -10,6 +10,7 @@ import pink.zak.api.wavybot.models.server.Server;
 import pink.zak.api.wavybot.models.user.User;
 import pink.zak.api.wavybot.models.user.music.MusicData;
 import pink.zak.api.wavybot.repositories.ServerRepository;
+import pink.zak.api.wavybot.services.MusicDataService;
 
 import java.util.Map;
 import java.util.Set;
@@ -19,18 +20,20 @@ import java.util.stream.Collectors;
 @Component
 public class RedisHelper {
     private final ServerRepository serverRepository;
+    private final MusicDataService musicDataService;
     private final RedisTemplate<String, Object> redis;
 
     @Autowired
-    public RedisHelper(ServerRepository serverRepository, RedisTemplate<String, Object> redisConnection) {
+    public RedisHelper(ServerRepository serverRepository, MusicDataService musicDataService, RedisTemplate<String, Object> redisConnection) {
         this.serverRepository = serverRepository;
+        this.musicDataService = musicDataService;
         this.redis = redisConnection;
     }
 
     @Async
     public ListenableFuture<Void> updateLeaderboards(User user) {
         Set<Long> serverIds = this.getServerLeaderboardsForUser(user);
-        MusicData musicData = user.getMusicData();
+        MusicData musicData = this.musicDataService.getByDiscordId(user.getDiscordId());
         double listens = musicData.getListens().size();
         double uniqueAlbums = musicData.getAlbumPlays().size();
         double uniqueArtists = musicData.getArtistPlays().size();

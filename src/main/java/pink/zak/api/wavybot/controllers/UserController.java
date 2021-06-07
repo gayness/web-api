@@ -10,21 +10,39 @@ import org.springframework.web.bind.annotation.RestController;
 import pink.zak.api.wavybot.models.dto.riptide.UserLinkDto;
 import pink.zak.api.wavybot.models.task.NewTaskResponse;
 import pink.zak.api.wavybot.models.user.User;
+import pink.zak.api.wavybot.models.user.WavyUser;
+import pink.zak.api.wavybot.models.user.music.MusicData;
+import pink.zak.api.wavybot.services.MusicDataService;
 import pink.zak.api.wavybot.services.UserService;
+import pink.zak.api.wavybot.services.WavyUserService;
 
 @RestController
 @RequestMapping("/user/{discordId}")
 public class UserController {
     private final UserService userService;
+    private final WavyUserService wavyUserService;
+    private final MusicDataService musicDataService;
 
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(UserService userService, WavyUserService wavyUserService, MusicDataService musicDataService) {
         this.userService = userService;
+        this.wavyUserService = wavyUserService;
+        this.musicDataService = musicDataService;
     }
 
     @GetMapping("/get")
     public User getUserById(@PathVariable long discordId, boolean createIfAbsent) {
         return this.userService.getUserById(discordId, createIfAbsent);
+    }
+
+    @GetMapping("getWavy")
+    public WavyUser getWavyUser(@PathVariable long discordId) {
+        return this.wavyUserService.getById(discordId);
+    }
+
+    @GetMapping("getMusicData")
+    public MusicData getMusicData(@PathVariable long discordId) {
+        return this.musicDataService.getByDiscordId(discordId);
     }
 
     @PostMapping("/updateListens")

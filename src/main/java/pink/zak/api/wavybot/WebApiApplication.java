@@ -29,9 +29,11 @@ public class WebApiApplication {
         mongoTemplate.save(wavyUser);
 
         User user = new User(240721111174610945L);
-        user.setWavyUser(wavyUser);
-        user.setMusicData(new MusicData(true));
+        user.setWavyUuid(wavyUser.getWavyUuid());
         mongoTemplate.save(user);
+
+        MusicData musicData = new MusicData(wavyUser.getWavyUuid(), user.getDiscordId());
+        mongoTemplate.save(musicData);
 
         Server server = new Server(751886048623067186L);
         server.getLinkedUsers().add(user.getDiscordId());
