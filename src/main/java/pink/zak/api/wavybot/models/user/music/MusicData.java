@@ -3,6 +3,7 @@ package pink.zak.api.wavybot.models.user.music;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.lang.NonNull;
 
 import java.util.List;
@@ -18,6 +19,7 @@ public class MusicData {
     @NonNull
     @Id
     private UUID wavyUuid;
+    @Indexed(unique = true)
     private long userId;
     @NonNull
     private List<TrackListen> listens;
