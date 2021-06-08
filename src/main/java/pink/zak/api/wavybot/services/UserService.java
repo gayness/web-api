@@ -51,6 +51,11 @@ public class UserService {
         return this.userRepository.insert(new User(discordId));
     }
 
+    @CachePut("user")
+    public User save(User user) {
+        return this.userRepository.save(user);
+    }
+
     public Task<Set<WavyListenDto>> linkUser(String wavyUsername, long discordId) throws RiptideStatusException {
         WavyUser testWavyUserX = this.wavyUserRepository.findByUsernameIsIgnoreCase(wavyUsername);
         if (testWavyUserX != null && testWavyUserX.getDiscordId() > 1)
@@ -69,6 +74,7 @@ public class UserService {
                 wavyUser.setDiscordId(discordId);
                 user.setWavyUuid(wavyUser.getWavyUuid());
                 this.wavyUserService.save(wavyUser);
+                this.save(user);
 
                 return this.wavyUserService.updateUserListens(wavyUser);
             }

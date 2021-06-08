@@ -7,5 +7,5 @@ import java.util.UUID;
 
 public interface MusicDataRepository extends MongoRepository<MusicData, UUID> {
 
-    MusicData findByUserId(long userId);
+    MusicData findByDiscordId(long userId);
 }

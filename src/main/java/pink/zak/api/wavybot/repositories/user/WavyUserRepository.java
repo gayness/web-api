@@ -9,7 +9,7 @@ import java.util.UUID;
 @Repository
 public interface WavyUserRepository extends MongoRepository<WavyUser, UUID> {
 
-    WavyUser findByUserIdIs(long userId);
+    WavyUser findByDiscordId(long userId);
 
     WavyUser findByUsernameIsIgnoreCase(String username);
 

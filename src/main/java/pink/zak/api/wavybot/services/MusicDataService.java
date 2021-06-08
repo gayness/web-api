@@ -22,14 +22,14 @@ public class MusicDataService {
 
     @Cacheable("musicData")
     public MusicData getByDiscordId(long discordId) {
-        MusicData optionalData = this.musicDataRepository.findByUserId(discordId);
+        MusicData optionalData = this.musicDataRepository.findByDiscordId(discordId);
         if (optionalData == null)
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Music data not found");
         return optionalData;
     }
 
     @CachePut("musicData")
-    public MusicData create(long discordId, UUID wavyUuid) {
+    public MusicData create(UUID wavyUuid, long discordId) {
         return this.musicDataRepository.insert(new MusicData(wavyUuid, discordId));
     }
 

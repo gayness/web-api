@@ -7,10 +7,11 @@ import org.apache.hc.core5.http.ParseException;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import java.io.IOException;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 @Configuration
 @ConfigurationProperties("credentials.spotify")
@@ -21,7 +22,7 @@ public class SpotifyConfig {
     private SpotifyApi spotifyApi;
 
     @Bean
-    public SpotifyApi generateSpotifyApi(ScheduledExecutorService scheduler) throws IOException, ParseException, SpotifyWebApiException {
+    public SpotifyApi generateSpotifyApi(ThreadPoolTaskScheduler scheduler) throws IOException, ParseException, SpotifyWebApiException {
         this.spotifyApi = new SpotifyApi.Builder()
                 .setClientId(this.clientId)
                 .setClientSecret(this.clientSecret)
@@ -30,7 +31,7 @@ public class SpotifyConfig {
         return spotifyApi;
     }
 
-    protected void renewCredentials(ScheduledExecutorService scheduler) throws IOException, org.apache.hc.core5.http.ParseException, SpotifyWebApiException {
+    protected void renewCredentials(ThreadPoolTaskScheduler scheduler) throws IOException, org.apache.hc.core5.http.ParseException, SpotifyWebApiException {
         ClientCredentials credentials = this.spotifyApi.clientCredentials().build().execute();
         this.spotifyApi.setAccessToken(credentials.getAccessToken());
         scheduler.schedule(() -> {
@@ -39,7 +40,7 @@ public class SpotifyConfig {
             } catch (IOException | ParseException | SpotifyWebApiException e) {
                 e.printStackTrace();
             }
-        }, credentials.getExpiresIn(), TimeUnit.SECONDS);
+        }, Instant.now().plus(credentials.getExpiresIn(), ChronoUnit.MILLIS));
     }
 
     public void setClientId(String clientId) {

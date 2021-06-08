@@ -43,7 +43,7 @@ public class WavyUserService {
 
     @Cacheable("wavyUser")
     public WavyUser getById(long discordId) {
-        WavyUser wavyUser = this.wavyUserRepository.findByUserIdIs(discordId);
+        WavyUser wavyUser = this.wavyUserRepository.findByDiscordId(discordId);
         if (wavyUser == null)
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Music data not found");
         return wavyUser;
@@ -60,8 +60,15 @@ public class WavyUserService {
     }
 
     public Task<Set<WavyListenDto>> updateUserListens(WavyUser user) {
-        MusicData musicData = this.musicDataService.getByDiscordId(user.getDiscordId());
-        musicData.getDiscordId()
+        MusicData musicData;
+        try {
+            musicData = this.musicDataService.getByDiscordId(user.getDiscordId());
+        } catch (ResponseStatusException ex) {
+            if (ex.getRawStatusCode() == 404)
+                musicData = this.musicDataService.create(user.getWavyUuid(), user.getDiscordId());
+            else
+                throw ex;
+        }
         List<TrackListen> listens = musicData.getListens();
         if (listens.isEmpty())
             return this.addAllListensForUser(user);
