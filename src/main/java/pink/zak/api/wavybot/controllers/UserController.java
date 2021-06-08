@@ -48,8 +48,8 @@ public class UserController {
     @PostMapping("/updateListens")
     public NewTaskResponse updateUserListens(@PathVariable long discordId) {
         System.out.println("BRRRRRRR");
-        User user = this.userService.getUserById(discordId, false);
-        return this.userService.updateUserListens(user).toResponse();
+        WavyUser user = this.wavyUserService.getById(discordId);
+        return this.wavyUserService.updateUserListens(user).toResponse();
     }
 
     @PostMapping("/linkWavy")

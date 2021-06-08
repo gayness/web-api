@@ -10,44 +10,30 @@ import pink.zak.api.wavybot.exceptions.RiptideStatusCode;
 import pink.zak.api.wavybot.exceptions.RiptideStatusException;
 import pink.zak.api.wavybot.helpers.ListenHelper;
 import pink.zak.api.wavybot.helpers.redis.RedisHelper;
-import pink.zak.api.wavybot.models.dto.wavy.music.WavyTrackDto;
-import pink.zak.api.wavybot.models.dto.wavy.music.album.WavyAlbumDto;
 import pink.zak.api.wavybot.models.dto.wavy.music.listens.WavyListenDto;
 import pink.zak.api.wavybot.models.task.Task;
 import pink.zak.api.wavybot.models.user.User;
 import pink.zak.api.wavybot.models.user.WavyUser;
-import pink.zak.api.wavybot.models.user.music.MusicData;
-import pink.zak.api.wavybot.models.user.music.TrackListen;
 import pink.zak.api.wavybot.repositories.user.UserRepository;
 import pink.zak.api.wavybot.repositories.user.WavyUserRepository;
 import pink.zak.api.wavybot.requesters.WavyRequester;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 @Service
 public class UserService {
     private final UserRepository userRepository;
     private final WavyUserRepository wavyUserRepository;
     private final WavyUserService wavyUserService;
-    private final MusicDataService musicDataService;
     private final WavyRequester requester;
-    private final RedisHelper redisHelper;
-    private final ListenHelper listenHelper;
 
     @Autowired
     public UserService(UserRepository userRepository, WavyUserRepository wavyUserRepository, WavyUserService wavyUserService, MusicDataService musicDataService, WavyRequester requester, RedisHelper redisHelper, ListenHelper listenHelper) {
         this.userRepository = userRepository;
         this.wavyUserRepository = wavyUserRepository;
         this.wavyUserService = wavyUserService;
-        this.musicDataService = musicDataService;
         this.requester = requester;
-        this.redisHelper = redisHelper;
-        this.listenHelper = listenHelper;
     }
 
     @Cacheable(value = "user")
@@ -67,7 +53,7 @@ public class UserService {
 
     public Task<Set<WavyListenDto>> linkUser(String wavyUsername, long discordId) throws RiptideStatusException {
         WavyUser testWavyUserX = this.wavyUserRepository.findByUsernameIsIgnoreCase(wavyUsername);
-        if (testWavyUserX != null && testWavyUserX.getUserId() > 1)
+        if (testWavyUserX != null && testWavyUserX.getDiscordId() > 1)
             throw RiptideStatusCode.WAVY_ALREADY_LINKED.getException();
         User user = this.getUserById(discordId, true);
         if (user.getWavyUuid() != null)
@@ -80,63 +66,15 @@ public class UserService {
                 throw RiptideStatusCode.WAVY_DISCORD_DOES_NOT_MATCH.getException();
             } else {
                 WavyUser wavyUser = testWavyUserX == null ? wavyUserDto.toUser(discordId) : testWavyUserX;
-                wavyUser.setUserId(discordId);
-                this.wavyUserService.save(wavyUser);
+                wavyUser.setDiscordId(discordId);
                 user.setWavyUuid(wavyUser.getWavyUuid());
+                this.wavyUserService.save(wavyUser);
 
-                return this.addAllListensForUser(user);
+                return this.wavyUserService.updateUserListens(wavyUser);
             }
         }).exceptionally(ex -> {
             ex.printStackTrace();
             return null;
         }).join();
-    }
-
-    public Task<Set<WavyListenDto>> updateUserListens(User user) {
-        List<TrackListen> listens = this.musicDataService.getByDiscordId(user.getDiscordId()).getListens();
-        if (listens.isEmpty())
-            return this.addAllListensForUser(user);
-        Collections.sort(listens);
-        long mostRecentListenTimestamp = listens.get(0).getListenTime() + 1000; // Add 1000 as otherwise it'll include the most recent
-        Task<Set<WavyListenDto>> taskStatus = this.requester.retrieveListensSince(user.getWavyUuid(), mostRecentListenTimestamp);
-        this.addListens(taskStatus, user, mostRecentListenTimestamp);
-        return taskStatus;
-    }
-
-    public Task<Set<WavyListenDto>> addAllListensForUser(User user) {
-        Task<Set<WavyListenDto>> taskStatus = this.requester.retrieveAllListens(user.getWavyUuid());
-        this.addListens(taskStatus, user, 0);
-        return taskStatus;
-    }
-
-    private void addListens(Task<Set<WavyListenDto>> taskStatus, User user, long previousFetchTime) {
-        taskStatus.getFuture().thenAccept(listenDtos -> {
-            Set<TrackListen> listens = listenDtos.stream().map(WavyListenDto::toTrackListen).collect(Collectors.toSet());
-            MusicData musicData = this.musicDataService.getByDiscordId(user.getDiscordId());
-            musicData.getListens().addAll(listens);
-            listenDtos.stream().map(WavyListenDto::getTrack).map(WavyTrackDto::getId).forEach(id -> {
-                if (musicData.getTrackPlays().containsKey(id))
-                    musicData.getTrackPlays().get(id).incrementAndGet();
-                else
-                    musicData.getTrackPlays().put(id, new AtomicInteger(1));
-            });
-            listenDtos.stream().map(WavyListenDto::getTrack).map(WavyTrackDto::getAlbum).map(WavyAlbumDto::getId).forEach(id -> {
-                if (musicData.getAlbumPlays().containsKey(id))
-                    musicData.getAlbumPlays().get(id).incrementAndGet();
-                else
-                    musicData.getAlbumPlays().put(id, new AtomicInteger(1));
-            });
-            listenDtos.stream().map(WavyListenDto::getArtistIds).forEach(idSet -> {
-                for (String id : idSet) {
-                    if (musicData.getArtistPlays().containsKey(id))
-                        musicData.getArtistPlays().get(id).incrementAndGet();
-                    else
-                        musicData.getArtistPlays().put(id, new AtomicInteger(1));
-                }
-            });
-            this.musicDataService.save(musicData);
-            listenDtos.forEach(this.listenHelper::processListen);
-            this.redisHelper.updateLeaderboards(user);
-        });
     }
 }

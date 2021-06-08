@@ -7,7 +7,7 @@ import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Component;
 import org.springframework.util.concurrent.ListenableFuture;
 import pink.zak.api.wavybot.models.server.Server;
-import pink.zak.api.wavybot.models.user.User;
+import pink.zak.api.wavybot.models.user.WavyUser;
 import pink.zak.api.wavybot.models.user.music.MusicData;
 import pink.zak.api.wavybot.repositories.ServerRepository;
 import pink.zak.api.wavybot.services.MusicDataService;
@@ -31,7 +31,7 @@ public class RedisHelper {
     }
 
     @Async
-    public ListenableFuture<Void> updateLeaderboards(User user) {
+    public ListenableFuture<Void> updateLeaderboards(WavyUser user) {
         Set<Long> serverIds = this.getServerLeaderboardsForUser(user);
         MusicData musicData = this.musicDataService.getByDiscordId(user.getDiscordId());
         double listens = musicData.getListens().size();
@@ -58,7 +58,7 @@ public class RedisHelper {
         return new AsyncResult<>(null);
     }
 
-    private Set<Long> getServerLeaderboardsForUser(User user) {
+    private Set<Long> getServerLeaderboardsForUser(WavyUser user) {
         return this.serverRepository.findByLinkedUsersContains(user.getDiscordId()).stream()
                 .map(Server::getServerId)
                 .collect(Collectors.toSet());

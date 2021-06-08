@@ -20,7 +20,7 @@ public class MusicData {
     @Id
     private UUID wavyUuid;
     @Indexed(unique = true)
-    private long userId;
+    private long discordId;
     @NonNull
     private List<TrackListen> listens;
     @NonNull
@@ -32,9 +32,9 @@ public class MusicData {
     @NonNull
     private Map<Long, SuspiciousDay> suspiciousDays; // The long is the start long of the day
 
-    public MusicData(@NonNull UUID wavyUuid, long userId) {
+    public MusicData(@NonNull UUID wavyUuid, long discordId) {
         this.wavyUuid = wavyUuid;
-        this.userId = userId;
+        this.discordId = discordId;
         this.listens = new CopyOnWriteArrayList<>();
         this.trackPlays = new ConcurrentHashMap<>();
         this.albumPlays = new ConcurrentHashMap<>();

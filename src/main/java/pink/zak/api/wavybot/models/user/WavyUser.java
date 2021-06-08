@@ -23,15 +23,14 @@ public class WavyUser {
     private String spotifyDisplayName;
     private long lastUpdate;
 
-    private long userId;
+    private long discordId;
 
-    public WavyUser(@NonNull UUID wavyUuid, @NonNull String username, String spotifyId, String spotifyDisplayName, long userId) {
+    public WavyUser(@NonNull UUID wavyUuid, @NonNull String username, String spotifyId, String spotifyDisplayName, long discordId) {
         this.wavyUuid = wavyUuid;
         this.username = username;
         this.spotifyId = spotifyId;
         this.spotifyDisplayName = spotifyDisplayName;
         this.lastUpdate = System.currentTimeMillis();
-
-        this.userId = userId;
+        this.discordId = discordId;
     }
 }

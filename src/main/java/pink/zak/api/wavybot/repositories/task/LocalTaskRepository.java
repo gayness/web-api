@@ -27,7 +27,6 @@ public class LocalTaskRepository {
 
     @Scheduled(fixedRate = 500)
     protected void updateDatabase() {
-        System.out.println("Update database called. Saving all  : " + this.activeTasks);
         this.redisTaskRepository.saveAll(this.activeTasks.values().stream().map(Task::toRedisTask).collect(Collectors.toSet()));
         for (Task<?> task : this.activeTasks.values())
             if (task.isCompleted() && (System.currentTimeMillis() - task.getCreationTime() > 10000 || task.getRequiredProgress() > 0)) {
