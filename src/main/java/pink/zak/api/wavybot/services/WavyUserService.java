@@ -75,17 +75,17 @@ public class WavyUserService {
         Collections.sort(listens);
         long mostRecentListenTimestamp = listens.get(0).getListenTime() + 1000; // Add 1000 as otherwise it'll include the most recent
         Task<Set<WavyListenDto>> taskStatus = this.requester.retrieveListensSince(user.getWavyUuid(), mostRecentListenTimestamp);
-        this.addListens(taskStatus, user, mostRecentListenTimestamp);
+        this.addListens(taskStatus, user);
         return taskStatus;
     }
 
     public Task<Set<WavyListenDto>> addAllListensForUser(WavyUser user) {
         Task<Set<WavyListenDto>> taskStatus = this.requester.retrieveAllListens(user.getWavyUuid());
-        this.addListens(taskStatus, user, 0);
+        this.addListens(taskStatus, user);
         return taskStatus;
     }
 
-    private void addListens(Task<Set<WavyListenDto>> taskStatus, WavyUser user, long previousFetchTime) {
+    private void addListens(Task<Set<WavyListenDto>> taskStatus, WavyUser user) {
         taskStatus.getFuture().thenAccept(listenDtos -> {
             Set<TrackListen> listens = listenDtos.stream().map(WavyListenDto::toTrackListen).collect(Collectors.toSet());
             MusicData musicData = this.musicDataService.getByDiscordId(user.getDiscordId());
