@@ -31,9 +31,9 @@ public class RedisHelper {
     }
 
     @Async
-    public ListenableFuture<Void> updateLeaderboards(WavyUser user) {
+    public ListenableFuture<Void> updateLeaderboards(WavyUser user, MusicData musicData) {
         Set<Long> serverIds = this.getServerLeaderboardsForUser(user);
-        MusicData musicData = this.musicDataService.getByDiscordId(user.getDiscordId());
+        System.out.println("Update leaderboards? " + serverIds + " music data play size " + musicData.getListens().size());
         double listens = musicData.getListens().size();
         double uniqueAlbums = musicData.getAlbumPlays().size();
         double uniqueArtists = musicData.getArtistPlays().size();
@@ -46,14 +46,20 @@ public class RedisHelper {
         String trackLeaderboardId = Leaderboard.PERSONAL_TRACKS.getLeaderboardId(user.getDiscordId());
         String albumLeaderboardId = Leaderboard.PERSONAL_ALBUMS.getLeaderboardId(user.getDiscordId());
         String artistLeaderboardId = Leaderboard.PERSONAL_ARTISTS.getLeaderboardId(user.getDiscordId());
+        System.out.println("Performing track plays update");
         for (Map.Entry<String, AtomicInteger> entry : musicData.getTrackPlays().entrySet()) {
             this.redis.opsForZSet().add(trackLeaderboardId, entry.getKey(), entry.getValue().get());
+            System.out.println("track " + entry.getKey() + "   -   " + entry.getValue().get());
         }
+        System.out.println("Performing album plays update");
         for (Map.Entry<String, AtomicInteger> entry : musicData.getAlbumPlays().entrySet()) {
             this.redis.opsForZSet().add(albumLeaderboardId, entry.getKey(), entry.getValue().get());
+            System.out.println("album " + entry.getKey() + "   -   " + entry.getValue().get());
         }
+        System.out.println("Performing artist plays update");
         for (Map.Entry<String, AtomicInteger> entry : musicData.getArtistPlays().entrySet()) {
             this.redis.opsForZSet().add(artistLeaderboardId, entry.getKey(), entry.getValue().get());
+            System.out.println("artist " + entry.getKey() + "   -   " + entry.getValue().get());
         }
         return new AsyncResult<>(null);
     }

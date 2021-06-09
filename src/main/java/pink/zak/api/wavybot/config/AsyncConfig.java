@@ -18,7 +18,7 @@ public class AsyncConfig {
         executor.setCorePoolSize(5);
         executor.setMaxPoolSize(100);
         executor.setKeepAliveSeconds(120);
-        executor.setThreadNamePrefix("wb-");
+        executor.setThreadNamePrefix("wb-executor-");
         return executor;
     }
 

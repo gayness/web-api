@@ -111,8 +111,8 @@ public class WavyUserService {
                 }
             });
             this.musicDataService.save(musicData);
+            this.redisHelper.updateLeaderboards(user, musicData);
             listenDtos.forEach(this.listenHelper::processListen);
-            this.redisHelper.updateLeaderboards(user);
         });
     }
 }

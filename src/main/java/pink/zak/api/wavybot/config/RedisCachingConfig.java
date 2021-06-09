@@ -41,8 +41,8 @@ public class RedisCachingConfig {
 
         template.setConnectionFactory(connectionFactory);
 
-        template.setKeySerializer(stringSerializer);
-        template.setHashKeySerializer(stringSerializer);
+        template.setKeySerializer(serializer);
+        template.setHashKeySerializer(serializer);
 
         template.setValueSerializer(serializer);
         template.setHashValueSerializer(serializer);
