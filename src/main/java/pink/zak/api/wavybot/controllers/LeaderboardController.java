@@ -13,7 +13,7 @@ import reactor.util.function.Tuple2;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/leaderboard/{leaderboard}/{discordId}")
+@RequestMapping("/leaderboard/{discordId}")
 public class LeaderboardController {
     private final LeaderboardService leaderboardService;
 
@@ -24,10 +24,10 @@ public class LeaderboardController {
 
     @GetMapping("getPartial")
     public Map<Long, Tuple2<Object, Long>> getPartial(
-            @PathVariable Leaderboard leaderboard,
             @PathVariable long discordId,
-            @RequestParam(name = "start", required = false, defaultValue = "1") long start,
-            @RequestParam(name = "end", required = false, defaultValue = "15") long end) {
+            @RequestParam Leaderboard leaderboard,
+            @RequestParam(required = false, defaultValue = "1") long start,
+            @RequestParam(required = false, defaultValue = "15") long end) {
         return this.leaderboardService.getPartialLeaderboard(leaderboard, discordId, start - 1, end - 1);
     }
 }
