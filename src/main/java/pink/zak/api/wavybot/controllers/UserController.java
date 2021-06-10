@@ -29,7 +29,7 @@ public class UserController {
         this.musicDataService = musicDataService;
     }
 
-    @GetMapping("/get")
+    @GetMapping("get")
     public User getUserById(@PathVariable long discordId, boolean createIfAbsent) {
         return this.userService.getUserById(discordId, createIfAbsent);
     }
@@ -44,14 +44,14 @@ public class UserController {
         return this.musicDataService.getByDiscordId(discordId);
     }
 
-    @GetMapping("/updateListens")
+    @GetMapping("updateListens")
     public NewTaskResponse updateUserListens(@PathVariable long discordId) {
         System.out.println("BRRRRRRR");
         WavyUser user = this.wavyUserService.getById(discordId);
         return this.wavyUserService.updateUserListens(user).toResponse();
     }
 
-    @GetMapping("/linkWavy")
+    @GetMapping("linkWavy")
     public NewTaskResponse linkWavy(@PathVariable long discordId, @RequestBody UserLinkDto userLinkDto) {
         System.out.println("BRRRRRRR");
         return this.userService.linkUser(userLinkDto.getUsername(), discordId).toResponse();

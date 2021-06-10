@@ -22,7 +22,7 @@ public class LeaderboardController {
         this.leaderboardService = leaderboardService;
     }
 
-    @GetMapping("/getPartial")
+    @GetMapping("getPartial")
     public Map<Long, Tuple2<Object, Long>> getPartial(
             @PathVariable Leaderboard leaderboard,
             @PathVariable long discordId,
