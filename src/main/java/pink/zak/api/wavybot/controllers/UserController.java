@@ -3,7 +3,6 @@ package pink.zak.api.wavybot.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -45,14 +44,14 @@ public class UserController {
         return this.musicDataService.getByDiscordId(discordId);
     }
 
-    @PostMapping("/updateListens")
+    @GetMapping("/updateListens")
     public NewTaskResponse updateUserListens(@PathVariable long discordId) {
         System.out.println("BRRRRRRR");
         WavyUser user = this.wavyUserService.getById(discordId);
         return this.wavyUserService.updateUserListens(user).toResponse();
     }
 
-    @PostMapping("/linkWavy")
+    @GetMapping("/linkWavy")
     public NewTaskResponse linkWavy(@PathVariable long discordId, @RequestBody UserLinkDto userLinkDto) {
         System.out.println("BRRRRRRR");
         return this.userService.linkUser(userLinkDto.getUsername(), discordId).toResponse();
