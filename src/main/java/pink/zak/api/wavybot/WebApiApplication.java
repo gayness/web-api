@@ -25,7 +25,7 @@ public class WebApiApplication {
 
     public static void test(ApplicationContext context) {
         MongoTemplate mongoTemplate = context.getBean(MongoTemplate.class);
-        WavyUser wavyUser = new WavyUser(UUID.fromString("51c0787c-f111-4858-9eda-5be9864fe0f0"), "Zak", "gtzhk8yungah3aciviyhx5xo3", "Zak", 240721111174610945L);
+        WavyUser wavyUser = new WavyUser(UUID.fromString("51c0787c-f111-4858-9eda-5be9864fe0f0"), 240721111174610945L, "Zak", "gtzhk8yungah3aciviyhx5xo3", "Zak");
         mongoTemplate.save(wavyUser);
 
         User user = new User(240721111174610945L);

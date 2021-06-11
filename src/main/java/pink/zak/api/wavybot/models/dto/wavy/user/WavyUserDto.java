@@ -28,6 +28,6 @@ public class WavyUserDto {
     private WavyUserAccessDto userAccess;
 
     public WavyUser toUser(long userId) {
-        return new WavyUser(this.uuid, this.username, this.spotifyId, this.spotifyDisplayName, userId);
+        return new WavyUser(this.uuid, userId, this.username, this.spotifyId, this.spotifyDisplayName);
     }
 }
