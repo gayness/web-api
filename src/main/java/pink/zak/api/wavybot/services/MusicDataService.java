@@ -20,7 +20,6 @@ public class MusicDataService {
         this.musicDataRepository = musicDataRepository;
     }
 
-    @Cacheable("musicData")
     public MusicData getByDiscordId(long discordId) {
         MusicData optionalData = this.musicDataRepository.findByDiscordId(discordId);
         if (optionalData == null)
@@ -28,12 +27,10 @@ public class MusicDataService {
         return optionalData;
     }
 
-    @CachePut("musicData")
     public MusicData create(UUID wavyUuid, long discordId) {
         return this.musicDataRepository.insert(new MusicData(wavyUuid, discordId));
     }
 
-    @CachePut("musicData")
     public MusicData save(MusicData musicData) {
         return this.musicDataRepository.save(musicData);
     }
