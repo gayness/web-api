@@ -39,7 +39,7 @@ public class ArtistService {
         }
     }
 
-    public Map<String, Artist> getArtistsById(Collection<String> spotifyIds) {
+    public Map<String, Artist> getArtistsById(String[] spotifyIds) {
         Map<String, Artist> retrievedArtists = Maps.newHashMap();
         try {
             for (String spotifyId : spotifyIds)

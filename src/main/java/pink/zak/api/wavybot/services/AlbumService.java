@@ -10,7 +10,6 @@ import org.springframework.web.server.ResponseStatusException;
 import pink.zak.api.wavybot.models.music.Album;
 import pink.zak.api.wavybot.repositories.music.AlbumRepository;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 
@@ -39,7 +38,7 @@ public class AlbumService {
         }
     }
 
-    public Map<String, Album> getAlbumsById(Collection<String> spotifyIds) {
+    public Map<String, Album> getAlbumsById(String[] spotifyIds) {
         Map<String, Album> retrievedAlbums = Maps.newHashMap();
         try {
             for (String spotifyId : spotifyIds)

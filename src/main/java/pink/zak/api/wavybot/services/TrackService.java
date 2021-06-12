@@ -39,7 +39,7 @@ public class TrackService {
         }
     }
 
-    public Map<String, Track> getTracksById(Collection<String> spotifyIds) {
+    public Map<String, Track> getTracksById(String[] spotifyIds) {
         Map<String, Track> retrievedTracks = Maps.newHashMap();
         try {
             for (String spotifyId : spotifyIds)

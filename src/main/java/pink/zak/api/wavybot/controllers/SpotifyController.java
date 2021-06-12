@@ -12,6 +12,8 @@ import pink.zak.api.wavybot.services.AlbumService;
 import pink.zak.api.wavybot.services.ArtistService;
 import pink.zak.api.wavybot.services.TrackService;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/spotify")
 public class SpotifyController {
@@ -31,13 +33,28 @@ public class SpotifyController {
         return this.albumService.getAlbumById(id);
     }
 
+    @GetMapping("/album/getBulk")
+    public Map<String, Album> getMultipleAlbums(@RequestParam String ids) {
+        return this.albumService.getAlbumsById(ids.split(","));
+    }
+
     @GetMapping("/artist/get")
     public Artist getArtist(@RequestParam String id) {
         return this.artistService.getArtistById(id);
     }
 
+    @GetMapping("/artist/getBulk")
+    public Map<String, Artist> getMultipleArtists(@RequestParam String ids) {
+        return this.artistService.getArtistsById(ids.split(","));
+    }
+
     @GetMapping("/track/get")
     public Track getTrack(@RequestParam String id) {
         return this.trackService.getTrackById(id);
+    }
+
+    @GetMapping("/track/getBulk")
+    public Map<String, Track> getMultipleTracks(@RequestParam String ids) {
+        return this.trackService.getTracksById(ids.split(","));
     }
 }
