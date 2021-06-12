@@ -106,7 +106,7 @@ public class SpotifyHelper {
         } else if (artist.isRich())
             return;
 
-        artist.setGenres(artist.getGenres());
+        artist.setGenres(retrievedArtist.getGenres());
         artist.setArtistImages(Arrays.stream(retrievedArtist.getImages()).map(spotifyImage -> {
             SpotifyImage image = new SpotifyImage();
             image.setHeight(spotifyImage.getHeight());
