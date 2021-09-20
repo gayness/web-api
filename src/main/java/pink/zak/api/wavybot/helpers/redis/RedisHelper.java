@@ -37,15 +37,15 @@ public class RedisHelper {
         double listens = musicData.getListens().size();
         double uniqueAlbums = musicData.getAlbumPlays().size();
         double uniqueArtists = musicData.getArtistPlays().size();
-        String userId = String.valueOf(user.getDiscordId());
+        String userId = String.valueOf(user.getUser().getDiscordId());
         for (long serverId : serverIds) {
             this.redis.opsForZSet().add(Leaderboard.SERVER_TRACKS.getLeaderboardId(serverId), userId, listens);
             this.redis.opsForZSet().add(Leaderboard.SERVER_ALBUMS.getLeaderboardId(serverId), userId, uniqueAlbums);
             this.redis.opsForZSet().add(Leaderboard.SERVER_ARTISTS.getLeaderboardId(serverId), userId, uniqueArtists);
         }
-        String trackLeaderboardId = Leaderboard.PERSONAL_TRACKS.getLeaderboardId(user.getDiscordId());
-        String albumLeaderboardId = Leaderboard.PERSONAL_ALBUMS.getLeaderboardId(user.getDiscordId());
-        String artistLeaderboardId = Leaderboard.PERSONAL_ARTISTS.getLeaderboardId(user.getDiscordId());
+        String trackLeaderboardId = Leaderboard.PERSONAL_TRACKS.getLeaderboardId(user.getUser().getDiscordId());
+        String albumLeaderboardId = Leaderboard.PERSONAL_ALBUMS.getLeaderboardId(user.getUser().getDiscordId());
+        String artistLeaderboardId = Leaderboard.PERSONAL_ARTISTS.getLeaderboardId(user.getUser().getDiscordId());
         System.out.println("Performing track plays update");
         for (Map.Entry<String, AtomicInteger> entry : musicData.getTrackPlays().entrySet()) {
             this.redis.opsForZSet().add(trackLeaderboardId, entry.getKey(), entry.getValue().get());
@@ -65,7 +65,7 @@ public class RedisHelper {
     }
 
     private Set<Long> getServerLeaderboardsForUser(WavyUser user) {
-        return this.serverRepository.findByLinkedUsersContains(user.getDiscordId()).stream()
+        return this.serverRepository.findByLinkedUsersContains(user.getUser()).stream()
                 .map(Server::getServerId)
                 .collect(Collectors.toSet());
     }

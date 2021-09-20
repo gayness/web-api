@@ -3,44 +3,76 @@ package pink.zak.api.wavybot.models.music;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.wrapper.spotify.enums.AlbumType;
 import com.wrapper.spotify.enums.ReleaseDatePrecision;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
-import org.springframework.data.annotation.Id;
+import lombok.Setter;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.annotation.Transient;
-import org.springframework.data.mongodb.core.mapping.Document;
 
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-@Data
-@Document
+@Entity
 @NoArgsConstructor
+@Getter
+@Setter
 public class Album {
     @Id
+    @Column(name = "id", unique = true, nullable = false)
     @NonNull
     private String id;
+
+    @Column(name = "name", nullable = false)
     @NonNull
     private String name;
+
+    @Column(name = "artists", nullable = false)
+    @ManyToMany
     @NonNull
-    private Set<String> artistIds;
+    private Set<Artist> artists;
+
     @NonNull
+    @Column(name = "album_images", nullable = false)
+    @OneToMany
     private Set<SpotifyImage> albumImages;
 
     // retrieved from spotify so only present if it is enriched.
+    @Column(name = "last_spotify_update")
     private long lastSpotifyUpdate;
-    private AlbumType albumType;
-    private String label;
-    private Date releaseDate;
-    private ReleaseDatePrecision releaseDatePrecision;
-    private String[] genres;
-    private List<String> trackIds;
 
-    public Album(@NonNull String id, @NonNull String name, @NonNull Set<String> artistIds, @NonNull Set<SpotifyImage> albumImages) {
+    @Column(name = "album_type")
+    private AlbumType albumType;
+
+    @Column(name = "label")
+    private String label;
+
+    @Column(name = "release_date")
+    private Date releaseDate;
+
+    @Column(name = "release_date_precision")
+    private ReleaseDatePrecision releaseDatePrecision;
+
+    @ElementCollection
+    @Column(name = "genres")
+    private Set<String> genres;
+
+    @Column(name = "tracks")
+    @ManyToMany
+    @NotNull
+    private List<Track> tracks;
+
+    public Album(@NonNull String id, @NonNull String name, @NonNull Set<Artist> artists, @NonNull Set<SpotifyImage> albumImages) {
         this.id = id;
         this.name = name;
-        this.artistIds = artistIds;
+        this.artists = artists;
         this.albumImages = albumImages;
     }
 

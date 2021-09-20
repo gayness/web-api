@@ -1,13 +1,14 @@
 package pink.zak.api.wavybot.repositories;
 
-import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import pink.zak.api.wavybot.models.server.Server;
+import pink.zak.api.wavybot.models.user.User;
 
 import java.util.List;
 
 @Repository
-public interface ServerRepository extends MongoRepository<Server, Long> {
+public interface ServerRepository extends JpaRepository<Server, Long> {
 
-    List<Server> findByLinkedUsersContains(long userId);
+    List<Server> findByLinkedUsersContains(User user);
 }

@@ -70,7 +70,7 @@ public class SpotifyHelper {
             album = new Album();
             album.setId(retrievedAlbum.getId());
             album.setName(retrievedAlbum.getName());
-            album.setArtistIds(Arrays.stream(retrievedAlbum.getArtists()).map(ArtistSimplified::getId).collect(Collectors.toSet()));
+            album.setArtists(Arrays.stream(retrievedAlbum.getArtists()).map(ArtistSimplified::getId).collect(Collectors.toSet()));
             album.setAlbumImages(Arrays.stream(retrievedAlbum.getImages()).map(retrievedImage -> {
                 return new SpotifyImage(retrievedImage.getHeight(), retrievedImage.getWidth(), retrievedImage.getUrl());
             }).collect(Collectors.toSet()));
@@ -79,11 +79,11 @@ public class SpotifyHelper {
         album.setAlbumType(retrievedAlbum.getAlbumType());
         album.setLabel(retrievedAlbum.getLabel());
         album.setGenres(retrievedAlbum.getGenres());
-        album.setTrackIds(Arrays.stream(retrievedAlbum.getTracks().getItems()).map(TrackSimplified::getId).collect(Collectors.toList()));
+        album.setTracks(Arrays.stream(retrievedAlbum.getTracks().getItems()).map(TrackSimplified::getId).collect(Collectors.toList()));
         album.setReleaseDate(this.parseDate(retrievedAlbum.getReleaseDate()));
         album.setReleaseDatePrecision(retrievedAlbum.getReleaseDatePrecision());
         album.setLastSpotifyUpdate(System.currentTimeMillis());
-        album.getTrackIds().forEach(this::enrichTrack);
+        album.getTracks().forEach(this::enrichTrack);
         this.albumService.save(album);
     }
 
@@ -135,8 +135,8 @@ public class SpotifyHelper {
             track.setId(retrievedTrack.getId());
             track.setName(retrievedTrack.getName());
             track.setAlbumId(retrievedTrack.getAlbum().getId());
-            track.setArtistIds(Arrays.stream(retrievedTrack.getArtists()).map(ArtistSimplified::getId).collect(Collectors.toSet()));
-            track.getArtistIds().forEach(this::enrichArtist);
+            track.setArtists(Arrays.stream(retrievedTrack.getArtists()).map(ArtistSimplified::getId).collect(Collectors.toSet()));
+            track.getArtists().forEach(this::enrichArtist);
         } else if (track.isRich())
             return;
 

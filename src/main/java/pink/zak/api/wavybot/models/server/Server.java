@@ -1,22 +1,32 @@
 package pink.zak.api.wavybot.models.server;
 
 import com.google.common.collect.Sets;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.lang.NonNull;
+import lombok.Setter;
+import org.jetbrains.annotations.NotNull;
+import pink.zak.api.wavybot.models.user.User;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import java.util.Set;
 
-@Data
-@Document
+@Entity
 @NoArgsConstructor
+@Getter
+@Setter
 public class Server {
     @Id
+    @Column(name = "server_id", unique = true, nullable = false)
     private long serverId;
-    @NonNull
-    private Set<Long> linkedUsers;
+
+    @Column(name = "linked_users", nullable = false)
+    @ManyToMany(fetch = FetchType.LAZY)
+    @NotNull
+    private Set<User> linkedUsers;
 
     public Server(long serverId) {
         this.serverId = serverId;

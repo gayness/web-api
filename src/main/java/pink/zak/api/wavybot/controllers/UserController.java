@@ -3,10 +3,9 @@ package pink.zak.api.wavybot.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import pink.zak.api.wavybot.models.dto.riptide.UserLinkDto;
 import pink.zak.api.wavybot.models.task.NewTaskResponse;
 import pink.zak.api.wavybot.models.user.User;
 import pink.zak.api.wavybot.models.user.WavyUser;
@@ -46,14 +45,12 @@ public class UserController {
 
     @GetMapping("updateListens")
     public NewTaskResponse updateUserListens(@PathVariable long discordId) {
-        System.out.println("BRRRRRRR");
         WavyUser user = this.wavyUserService.getById(discordId);
         return this.wavyUserService.updateUserListens(user).toResponse();
     }
 
     @GetMapping("linkWavy")
-    public NewTaskResponse linkWavy(@PathVariable long discordId, @RequestBody UserLinkDto userLinkDto) {
-        System.out.println("BRRRRRRR");
-        return this.userService.linkUser(userLinkDto.getUsername(), discordId).toResponse();
+    public NewTaskResponse linkWavy(@PathVariable long discordId, @RequestParam String wavyUsername) {
+        return this.userService.linkUser(wavyUsername, discordId).toResponse();
     }
 }

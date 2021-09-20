@@ -1,23 +1,27 @@
 package pink.zak.api.wavybot.models.user;
 
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.index.Indexed;
-import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.lang.Nullable;
+import lombok.Setter;
 
-import java.util.UUID;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Id;
+import javax.persistence.OneToOne;
 
-@Data
-@Document
+@Entity
 @NoArgsConstructor
+@Getter
+@Setter
 public class User {
+
     @Id
+    @Column(name = "discord_id")
     private long discordId;
-    @Nullable
-    @Indexed(unique = true)
-    private UUID wavyUuid;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    private WavyUser wavyUser;
 
     public User(long discordId) {
         this.discordId = discordId;

@@ -2,15 +2,9 @@ package pink.zak.api.wavybot.requesters;
 
 import com.google.common.collect.Sets;
 import com.mongodb.lang.NonNull;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
-import okhttp3.ResponseBody;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Component;
-import org.springframework.util.concurrent.ListenableFuture;
 import pink.zak.api.wavybot.models.builder.ModelBuilder;
 import pink.zak.api.wavybot.models.dto.wavy.music.listens.WavyListenDto;
 import pink.zak.api.wavybot.models.dto.wavy.music.listens.WavyListenPage;
@@ -18,7 +12,10 @@ import pink.zak.api.wavybot.models.dto.wavy.user.WavyUserDto;
 import pink.zak.api.wavybot.models.task.Task;
 import pink.zak.api.wavybot.services.TaskService;
 
-import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -28,7 +25,7 @@ import java.util.concurrent.Executor;
 @Component
 public class WavyRequester {
     private final ModelBuilder modelBuilder;
-    private final OkHttpClient httpClient = new OkHttpClient();
+    private final HttpClient httpClient = HttpClient.newBuilder().build();
     private final Executor executor;
     private final TaskService taskService;
 
@@ -45,20 +42,13 @@ public class WavyRequester {
 
     @NonNull
     @Async
-    public ListenableFuture<WavyUserDto> retrieveWavyUser(@NonNull String username) {
+    public CompletableFuture<WavyUserDto> retrieveWavyUser(@NonNull String username) {
         System.out.println("Getting wavy user");
-        Request request = new Request.Builder()
-                .url(String.format(PROFILE_DATA_BASE_URL, username))
-                .build();
-        try (Response response = this.httpClient.newCall(request).execute()) {
-            ResponseBody responseBody = response.body();
-            if (responseBody == null)
-                throw new RuntimeException("Response body null for retrieveUser request");
-            return new AsyncResult<>(this.modelBuilder.createWavyUserDto(responseBody.string()));
-        } catch (IOException e) {
-            e.printStackTrace();
-            return new AsyncResult<>(null);
-        }
+        HttpRequest request = HttpRequest.newBuilder()
+            .uri(URI.create(String.format(PROFILE_DATA_BASE_URL, username)))
+            .build();
+
+        return this.httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString()).thenApply(stringResponse -> this.modelBuilder.createWavyUserDto(stringResponse.body()));
     }
 
     public Task<Set<WavyListenDto>> retrieveAllListens(UUID uuid) {
@@ -89,20 +79,11 @@ public class WavyRequester {
     }
 
     public CompletableFuture<WavyListenPage> retrieveListenPage(UUID uuid, int page) {
-        return CompletableFuture.supplyAsync(() -> {
-            Request request = new Request.Builder()
-                    .url(String.format(SONG_HISTORY_BASE_URL, uuid, page))
-                    .build();
-            try (Response response = this.httpClient.newCall(request).execute()) {
-                ResponseBody responseBody = response.body();
-                if (responseBody == null)
-                    throw new RuntimeException("Response body null for retrieveUser request");
-                return this.modelBuilder.createListenPage(responseBody.string());
-            } catch (IOException e) {
-                e.printStackTrace();
-                return null;
-            }
-        }, this.executor);
+        HttpRequest request = HttpRequest.newBuilder()
+            .uri(URI.create(String.format(SONG_HISTORY_BASE_URL, uuid, page)))
+            .build();
+
+        return this.httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString()).thenApply(stringResponse -> this.modelBuilder.createListenPage(stringResponse.body()));
     }
 
     public Task<Set<WavyListenDto>> retrieveListensSince(UUID uuid, long since) {
@@ -133,19 +114,10 @@ public class WavyRequester {
     }
 
     public CompletableFuture<WavyListenPage> retrieveListensSincePage(UUID uuid, int page, long since) {
-        return CompletableFuture.supplyAsync(() -> {
-            Request request = new Request.Builder()
-                    .url(String.format(SONG_HISTORY_SINCE_BASE_URL, uuid, page, since))
-                    .build();
-            try (Response response = this.httpClient.newCall(request).execute()) {
-                ResponseBody responseBody = response.body();
-                if (responseBody == null)
-                    throw new RuntimeException("Response body null for retrieveListensSincePage request");
-                return this.modelBuilder.createListenPage(responseBody.string());
-            } catch (IOException e) {
-                e.printStackTrace();
-                return null;
-            }
-        }, this.executor);
+        HttpRequest request = HttpRequest.newBuilder()
+            .uri(URI.create(String.format(SONG_HISTORY_SINCE_BASE_URL, uuid, page, since)))
+            .build();
+
+        return this.httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString()).thenApply(stringResponse -> this.modelBuilder.createListenPage(stringResponse.body()));
     }
 }

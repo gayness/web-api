@@ -58,12 +58,12 @@ public class UserService {
 
     public Task<Set<WavyListenDto>> linkUser(String wavyUsername, long discordId) throws RiptideStatusException {
         WavyUser testWavyUserX = this.wavyUserRepository.findByUsernameIsIgnoreCase(wavyUsername);
-        if (testWavyUserX != null && testWavyUserX.getDiscordId() > 1)
+        if (testWavyUserX != null && testWavyUserX.getUser() > 1)
             throw RiptideStatusCode.WAVY_ALREADY_LINKED.getException();
         User user = this.getUserById(discordId, true);
         if (user.getWavyUuid() != null)
             throw RiptideStatusCode.DISCORD_ALREADY_LINKED.getException();
-        return this.requester.retrieveWavyUser(wavyUsername).completable().thenApply(wavyUserDto -> {
+        return this.requester.retrieveWavyUser(wavyUsername).thenApply(wavyUserDto -> {
             long wavyDiscordId = wavyUserDto.getDiscordId();
             if (wavyDiscordId < 1) {
                 throw RiptideStatusCode.WAVY_PROFILE_HAS_NO_DISCORD.getException();
@@ -71,7 +71,7 @@ public class UserService {
                 throw RiptideStatusCode.WAVY_DISCORD_DOES_NOT_MATCH.getException();
             } else {
                 WavyUser wavyUser = testWavyUserX == null ? wavyUserDto.toUser(discordId) : testWavyUserX;
-                wavyUser.setDiscordId(discordId);
+                wavyUser.setUser(discordId);
                 user.setWavyUuid(wavyUser.getWavyUuid());
                 this.wavyUserService.save(wavyUser);
                 this.save(user);
