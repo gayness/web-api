@@ -1,8 +1,6 @@
 package pink.zak.api.wavybot.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -20,7 +18,7 @@ public class ServerService {
         this.serverRepository = serverRepository;
     }
 
-    @Cacheable("server")
+    //@Cacheable("server")
     public Server getServerById(long serverId) throws ResponseStatusException {
         Optional<Server> optionalServer = this.serverRepository.findById(serverId);
         if (optionalServer.isPresent())
@@ -29,14 +27,11 @@ public class ServerService {
     }
 
     public Server getServerOrNullById(long serverId) {
-        try {
-            return this.getServerById(serverId);
-        } catch (ResponseStatusException ex) {
-            return null;
-        }
+        Optional<Server> optionalServer = this.serverRepository.findById(serverId);
+        return optionalServer.orElse(null);
     }
 
-    @CachePut("server")
+    //@CachePut("server")
     public Server save(Server server) {
         return this.serverRepository.save(server);
     }

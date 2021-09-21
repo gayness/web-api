@@ -5,7 +5,6 @@ import com.wrapper.spotify.enums.AlbumType;
 import com.wrapper.spotify.enums.ReleaseDatePrecision;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.annotation.Transient;
@@ -27,26 +26,27 @@ import java.util.Set;
 public class Album {
     @Id
     @Column(name = "id", unique = true, nullable = false)
-    @NonNull
+    @NotNull
     private String id;
 
     @Column(name = "name", nullable = false)
-    @NonNull
+    @NotNull
     private String name;
 
-    @Column(name = "artists", nullable = false)
-    @ManyToMany
-    @NonNull
-    private Set<Artist> artists;
-
-    @NonNull
-    @Column(name = "album_images", nullable = false)
-    @OneToMany
-    private Set<SpotifyImage> albumImages;
-
     // retrieved from spotify so only present if it is enriched.
+
     @Column(name = "last_spotify_update")
     private long lastSpotifyUpdate;
+
+    @Column(name = "artists")
+    @ManyToMany
+    @NotNull
+    private Set<Artist> artists;
+
+    @NotNull
+    @Column(name = "album_images")
+    @OneToMany
+    private Set<SpotifyImage> albumImages;
 
     @Column(name = "album_type")
     private AlbumType albumType;
@@ -69,11 +69,9 @@ public class Album {
     @NotNull
     private List<Track> tracks;
 
-    public Album(@NonNull String id, @NonNull String name, @NonNull Set<Artist> artists, @NonNull Set<SpotifyImage> albumImages) {
+    public Album(@NotNull String id, @NotNull String name) {
         this.id = id;
         this.name = name;
-        this.artists = artists;
-        this.albumImages = albumImages;
     }
 
     @Transient

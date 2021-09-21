@@ -1,16 +1,15 @@
 package pink.zak.api.wavybot.services;
 
 import com.google.common.collect.Maps;
+import com.wrapper.spotify.model_objects.specification.TrackSimplified;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import pink.zak.api.wavybot.models.music.Track;
 import pink.zak.api.wavybot.repositories.music.TrackRepository;
+import pink.zak.api.wavybot.utils.SimplifiedUtils;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 
@@ -23,7 +22,7 @@ public class TrackService {
         this.trackRepository = trackRepository;
     }
 
-    @Cacheable("track")
+    //@Cacheable("track")
     public Track getTrackById(String spotifyId) throws ResponseStatusException {
         Optional<Track> optionalTrack = this.trackRepository.findById(spotifyId);
         if (optionalTrack.isPresent())
@@ -32,11 +31,16 @@ public class TrackService {
     }
 
     public Track getTrackOrNullById(String spotifyId) {
-        try {
-            return this.getTrackById(spotifyId);
-        } catch (ResponseStatusException ex) {
-            return null;
-        }
+        Optional<Track> optionalTrack = this.trackRepository.findById(spotifyId);
+        return optionalTrack.orElse(null);
+    }
+
+    public Track getTrackOrCreateBySimplified(TrackSimplified trackSimplified) {
+        Optional<Track> optionalTrack = this.trackRepository.findById(trackSimplified.getId());
+        return optionalTrack.orElseGet(() -> {
+            Track track = SimplifiedUtils.createTrack(trackSimplified);
+            return this.trackRepository.save(track);
+        });
     }
 
     public Map<String, Track> getTracksById(String[] spotifyIds) {
@@ -49,7 +53,7 @@ public class TrackService {
         return retrievedTracks;
     }
 
-    @CachePut("track")
+    //@CachePut("track")
     public Track save(Track track) {
         return this.trackRepository.save(track);
     }

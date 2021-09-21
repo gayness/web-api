@@ -4,14 +4,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.ApplicationContext;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import pink.zak.api.wavybot.models.server.Server;
-import pink.zak.api.wavybot.models.user.User;
-import pink.zak.api.wavybot.models.user.WavyUser;
-import pink.zak.api.wavybot.models.user.music.MusicData;
-
-import java.util.UUID;
 
 @SpringBootApplication
 @EnableCaching
@@ -23,7 +16,7 @@ public class WebApiApplication {
         //test(context);
     }
 
-    public static void test(ApplicationContext context) {
+    /*public static void test(ApplicationContext context) {
         MongoTemplate mongoTemplate = context.getBean(MongoTemplate.class);
         WavyUser wavyUser = new WavyUser(UUID.fromString("51c0787c-f111-4858-9eda-5be9864fe0f0"), 240721111174610945L, "Zak", "gtzhk8yungah3aciviyhx5xo3", "Zak");
         mongoTemplate.save(wavyUser);
@@ -42,5 +35,5 @@ public class WebApiApplication {
         System.out.println(mongoTemplate.findById(240721111174610945L, User.class));
         System.out.println(mongoTemplate.findById(751886048623067186L, Server.class));
 
-    }
+    }*/
 }

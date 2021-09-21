@@ -5,13 +5,13 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.Type;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
+import pink.zak.api.wavybot.models.user.music.MusicData;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
 import java.util.UUID;
@@ -23,8 +23,7 @@ import java.util.UUID;
 public class WavyUser {
 
     @Id
-    @GeneratedValue
-    @Column(name = "wavy_uuid", columnDefinition = "CHAR(36)")
+    @Column(name = "wavy_uuid")
     @Type(type = "uuid-char")
     @NotNull
     private UUID wavyUuid;
@@ -32,8 +31,11 @@ public class WavyUser {
     @OneToOne(fetch = FetchType.LAZY)
     private User user;
 
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private MusicData musicData = new MusicData(this);
+
     @Column(name = "wavy_username", unique = true, nullable = false)
-    @NonNull
+    @NotNull
     private String wavyUsername;
 
     @Column(name = "spotify_id", unique = true)
@@ -47,7 +49,7 @@ public class WavyUser {
     @Column(name = "last_update", nullable = false)
     private long lastUpdate;
 
-    public WavyUser(@NonNull UUID wavyUuid, User user, @NonNull String username, @Nullable String spotifyId, @Nullable String spotifyDisplayName) {
+    public WavyUser(@NotNull UUID wavyUuid, User user, @NotNull String username, @Nullable String spotifyId, @Nullable String spotifyDisplayName) {
         this.wavyUuid = wavyUuid;
         this.user = user;
         this.wavyUsername = username;

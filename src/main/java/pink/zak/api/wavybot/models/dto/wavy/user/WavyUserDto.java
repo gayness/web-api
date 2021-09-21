@@ -2,6 +2,7 @@ package pink.zak.api.wavybot.models.dto.wavy.user;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
+import pink.zak.api.wavybot.models.user.User;
 import pink.zak.api.wavybot.models.user.WavyUser;
 
 import java.util.UUID;
@@ -27,7 +28,7 @@ public class WavyUserDto {
     @JsonProperty("$access")
     private WavyUserAccessDto userAccess;
 
-    public WavyUser toUser(long userId) {
-        return new WavyUser(this.uuid, userId, this.username, this.spotifyId, this.spotifyDisplayName);
+    public WavyUser toUser(User user) {
+        return new WavyUser(this.uuid, user, this.username, this.spotifyId, this.spotifyDisplayName);
     }
 }

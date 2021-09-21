@@ -1,16 +1,15 @@
 package pink.zak.api.wavybot.services;
 
 import com.google.common.collect.Maps;
+import com.wrapper.spotify.model_objects.specification.ArtistSimplified;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import pink.zak.api.wavybot.models.music.Artist;
 import pink.zak.api.wavybot.repositories.music.ArtistRepository;
+import pink.zak.api.wavybot.utils.SimplifiedUtils;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 
@@ -23,7 +22,7 @@ public class ArtistService {
         this.artistRepository = artistRepository;
     }
 
-    @Cacheable("artist")
+    //@Cacheable("artist")
     public Artist getArtistById(String spotifyId) throws ResponseStatusException {
         Optional<Artist> optionalArtist = this.artistRepository.findById(spotifyId);
         if (optionalArtist.isPresent())
@@ -32,11 +31,16 @@ public class ArtistService {
     }
 
     public Artist getArtistOrNullById(String spotifyId) {
-        try {
-            return this.getArtistById(spotifyId);
-        } catch (ResponseStatusException ex) {
-            return null;
-        }
+        Optional<Artist> optionalArtist = this.artistRepository.findById(spotifyId);
+        return optionalArtist.orElse(null);
+    }
+
+    public Artist getArtistOrCreateBySimplified(ArtistSimplified artistSimplified) {
+        Optional<Artist> optionalArtist = this.artistRepository.findById(artistSimplified.getId());
+        return optionalArtist.orElseGet(() -> {
+            Artist artist = SimplifiedUtils.createArtist(artistSimplified);
+            return this.artistRepository.save(artist);
+        });
     }
 
     public Map<String, Artist> getArtistsById(String[] spotifyIds) {
@@ -49,7 +53,7 @@ public class ArtistService {
         return retrievedArtists;
     }
 
-    @CachePut("artist")
+    //@CachePut("artist")
     public Artist save(Artist artist) {
         return this.artistRepository.save(artist);
     }

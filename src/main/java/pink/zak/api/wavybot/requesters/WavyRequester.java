@@ -1,7 +1,7 @@
 package pink.zak.api.wavybot.requesters;
 
 import com.google.common.collect.Sets;
-import com.mongodb.lang.NonNull;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -40,9 +40,9 @@ public class WavyRequester {
         this.taskService = taskService;
     }
 
-    @NonNull
+    @NotNull
     @Async
-    public CompletableFuture<WavyUserDto> retrieveWavyUser(@NonNull String username) {
+    public CompletableFuture<WavyUserDto> retrieveWavyUser(@NotNull String username) {
         System.out.println("Getting wavy user");
         HttpRequest request = HttpRequest.newBuilder()
             .uri(URI.create(String.format(PROFILE_DATA_BASE_URL, username)))

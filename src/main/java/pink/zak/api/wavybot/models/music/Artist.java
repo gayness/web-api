@@ -3,8 +3,8 @@ package pink.zak.api.wavybot.models.music;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
 import lombok.Setter;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.annotation.Transient;
 
 import javax.persistence.Column;
@@ -21,11 +21,11 @@ import java.util.Set;
 public class Artist {
     @Id
     @Column(name = "id", unique = true, nullable = false)
-    @NonNull
+    @NotNull
     private String id;
 
     @Column(name = "name", nullable = false)
-    @NonNull
+    @NotNull
     private String name;
 
     // retrieved from spotify so only present if it is enriched.
@@ -40,7 +40,7 @@ public class Artist {
     @Column(name = "genres")
     private Set<String> genres;
 
-    public Artist(@NonNull String id, @NonNull String name) {
+    public Artist(@NotNull String id, @NotNull String name) {
         this.id = id;
         this.name = name;
     }

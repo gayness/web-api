@@ -1,14 +1,15 @@
 package pink.zak.api.wavybot.services;
 
 import com.google.common.collect.Maps;
+import com.wrapper.spotify.model_objects.specification.AlbumSimplified;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import pink.zak.api.wavybot.models.music.Album;
 import pink.zak.api.wavybot.repositories.music.AlbumRepository;
+import pink.zak.api.wavybot.utils.SimplifiedUtils;
 
 import java.util.Map;
 import java.util.Optional;
@@ -22,7 +23,7 @@ public class AlbumService {
         this.albumRepository = albumRepository;
     }
 
-    @Cacheable("album")
+    //@Cacheable("album")
     public Album getAlbumById(String spotifyId) throws ResponseStatusException {
         Optional<Album> optionalAlbum = this.albumRepository.findById(spotifyId);
         if (optionalAlbum.isPresent())
@@ -31,11 +32,16 @@ public class AlbumService {
     }
 
     public Album getAlbumOrNullById(String spotifyId) {
-        try {
-            return this.getAlbumById(spotifyId);
-        } catch (ResponseStatusException ex) {
-            return null;
-        }
+        Optional<Album> optionalAlbum = this.albumRepository.findById(spotifyId);
+        return optionalAlbum.orElse(null);
+    }
+
+    public Album getArtistOrCreateBySimplified(AlbumSimplified albumSimplified) {
+        Optional<Album> optionalAlbum = this.albumRepository.findById(albumSimplified.getId());
+        return optionalAlbum.orElseGet(() -> {
+            Album album = SimplifiedUtils.createAlbum(albumSimplified);
+            return this.albumRepository.save(album);
+        });
     }
 
     public Map<String, Album> getAlbumsById(String[] spotifyIds) {
@@ -48,7 +54,7 @@ public class AlbumService {
         return retrievedAlbums;
     }
 
-    @CachePut("album")
+    //@CachePut("album")
     public Album save(Album album) {
         return this.albumRepository.save(album);
     }

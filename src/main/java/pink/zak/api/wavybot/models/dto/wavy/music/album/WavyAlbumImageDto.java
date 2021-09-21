@@ -10,6 +10,6 @@ public class WavyAlbumImageDto {
     private String url;
 
     public SpotifyImage toSpotifyImage() {
-        return new SpotifyImage(this.height, this.width, this.url);
+        return new SpotifyImage(this.url, this.height, this.width);
     }
 }

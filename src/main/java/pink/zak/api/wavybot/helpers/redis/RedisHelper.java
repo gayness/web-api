@@ -10,7 +10,6 @@ import pink.zak.api.wavybot.models.server.Server;
 import pink.zak.api.wavybot.models.user.WavyUser;
 import pink.zak.api.wavybot.models.user.music.MusicData;
 import pink.zak.api.wavybot.repositories.ServerRepository;
-import pink.zak.api.wavybot.services.MusicDataService;
 
 import java.util.Map;
 import java.util.Set;
@@ -20,13 +19,11 @@ import java.util.stream.Collectors;
 @Component
 public class RedisHelper {
     private final ServerRepository serverRepository;
-    private final MusicDataService musicDataService;
     private final RedisTemplate<String, Object> redis;
 
     @Autowired
-    public RedisHelper(ServerRepository serverRepository, MusicDataService musicDataService, RedisTemplate<String, Object> redisConnection) {
+    public RedisHelper(ServerRepository serverRepository, RedisTemplate<String, Object> redisConnection) {
         this.serverRepository = serverRepository;
-        this.musicDataService = musicDataService;
         this.redis = redisConnection;
     }
 
@@ -66,7 +63,7 @@ public class RedisHelper {
 
     private Set<Long> getServerLeaderboardsForUser(WavyUser user) {
         return this.serverRepository.findByLinkedUsersContains(user.getUser()).stream()
-                .map(Server::getServerId)
-                .collect(Collectors.toSet());
+            .map(Server::getServerId)
+            .collect(Collectors.toSet());
     }
 }

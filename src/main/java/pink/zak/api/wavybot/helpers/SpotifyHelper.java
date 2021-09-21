@@ -1,9 +1,9 @@
 package pink.zak.api.wavybot.helpers;
 
+import com.google.common.collect.Sets;
 import com.wrapper.spotify.SpotifyApi;
 import com.wrapper.spotify.exceptions.SpotifyWebApiException;
-import com.wrapper.spotify.model_objects.specification.ArtistSimplified;
-import com.wrapper.spotify.model_objects.specification.TrackSimplified;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -54,12 +54,11 @@ public class SpotifyHelper {
         this.executor = executor;
     }
 
-    public void enrichAlbum(String id) {
-        Album album = this.albumService.getAlbumOrNullById(id);
-        if (album == null || !album.isRich()) {
+    public void enrichAlbum(@NotNull Album album) {
+        if (!album.isRich()) {
             synchronized (this.albumQueue) {
-                if (!this.albumQueue.contains(id))
-                    this.albumQueue.add(id);
+                if (!this.albumQueue.contains(album.getId()))
+                    this.albumQueue.add(album.getId());
             }
         }
     }
@@ -70,16 +69,16 @@ public class SpotifyHelper {
             album = new Album();
             album.setId(retrievedAlbum.getId());
             album.setName(retrievedAlbum.getName());
-            album.setArtists(Arrays.stream(retrievedAlbum.getArtists()).map(ArtistSimplified::getId).collect(Collectors.toSet()));
+            album.setArtists(Arrays.stream(retrievedAlbum.getArtists()).map(this.artistService::getArtistOrCreateBySimplified).collect(Collectors.toSet()));
             album.setAlbumImages(Arrays.stream(retrievedAlbum.getImages()).map(retrievedImage -> {
-                return new SpotifyImage(retrievedImage.getHeight(), retrievedImage.getWidth(), retrievedImage.getUrl());
+                return new SpotifyImage(retrievedImage.getUrl(), retrievedImage.getHeight(), retrievedImage.getWidth());
             }).collect(Collectors.toSet()));
         } else if (album.isRich())
             return;
         album.setAlbumType(retrievedAlbum.getAlbumType());
         album.setLabel(retrievedAlbum.getLabel());
-        album.setGenres(retrievedAlbum.getGenres());
-        album.setTracks(Arrays.stream(retrievedAlbum.getTracks().getItems()).map(TrackSimplified::getId).collect(Collectors.toList()));
+        album.setGenres(Sets.newHashSet(retrievedAlbum.getGenres()));
+        album.setTracks(Arrays.stream(retrievedAlbum.getTracks().getItems()).map(this.trackService::getTrackOrCreateBySimplified).collect(Collectors.toList()));
         album.setReleaseDate(this.parseDate(retrievedAlbum.getReleaseDate()));
         album.setReleaseDatePrecision(retrievedAlbum.getReleaseDatePrecision());
         album.setLastSpotifyUpdate(System.currentTimeMillis());
@@ -87,12 +86,11 @@ public class SpotifyHelper {
         this.albumService.save(album);
     }
 
-    public void enrichArtist(String id) {
-        Artist artist = this.artistService.getArtistOrNullById(id);
-        if (artist == null || !artist.isRich()) {
+    public void enrichArtist(@NotNull Artist artist) {
+        if (!artist.isRich()) {
             synchronized (this.artistQueue) {
-                if (!this.artistQueue.contains(id))
-                    this.artistQueue.add(id);
+                if (!this.artistQueue.contains(artist.getId()))
+                    this.artistQueue.add(artist.getId());
             }
         }
     }
@@ -106,7 +104,7 @@ public class SpotifyHelper {
         } else if (artist.isRich())
             return;
 
-        artist.setGenres(retrievedArtist.getGenres());
+        artist.setGenres(Sets.newHashSet(retrievedArtist.getGenres()));
         artist.setArtistImages(Arrays.stream(retrievedArtist.getImages()).map(spotifyImage -> {
             SpotifyImage image = new SpotifyImage();
             image.setHeight(spotifyImage.getHeight());
@@ -118,12 +116,11 @@ public class SpotifyHelper {
         this.artistService.save(artist);
     }
 
-    public void enrichTrack(String id) {
-        Track track = this.trackService.getTrackOrNullById(id);
-        if (track == null || !track.isRich()) {
+    public void enrichTrack(@NotNull Track track) {
+        if (!track.isRich()) {
             synchronized (this.trackQueue) {
-                if (!this.trackQueue.contains(id))
-                    this.trackQueue.add(id);
+                if (!this.trackQueue.contains(track.getId()))
+                    this.trackQueue.add(track.getId());
             }
         }
     }
@@ -135,7 +132,7 @@ public class SpotifyHelper {
             track.setId(retrievedTrack.getId());
             track.setName(retrievedTrack.getName());
             track.setAlbumId(retrievedTrack.getAlbum().getId());
-            track.setArtists(Arrays.stream(retrievedTrack.getArtists()).map(ArtistSimplified::getId).collect(Collectors.toSet()));
+            track.setArtists(Arrays.stream(retrievedTrack.getArtists()).map(this.artistService::getArtistOrCreateBySimplified).collect(Collectors.toSet()));
             track.getArtists().forEach(this::enrichArtist);
         } else if (track.isRich())
             return;

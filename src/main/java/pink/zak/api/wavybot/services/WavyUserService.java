@@ -1,7 +1,6 @@
 package pink.zak.api.wavybot.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -27,21 +26,19 @@ import java.util.stream.Collectors;
 @Service
 public class WavyUserService {
     private final WavyUserRepository wavyUserRepository;
-    private final MusicDataService musicDataService;
     private final RedisHelper redisHelper;
     private final ListenHelper listenHelper;
     private final WavyRequester requester;
 
     @Autowired
-    public WavyUserService(WavyUserRepository wavyUserRepository, MusicDataService musicDataService, RedisHelper redisHelper, ListenHelper listenHelper, WavyRequester requester) {
+    public WavyUserService(WavyUserRepository wavyUserRepository, RedisHelper redisHelper, ListenHelper listenHelper, WavyRequester requester) {
         this.wavyUserRepository = wavyUserRepository;
-        this.musicDataService = musicDataService;
         this.redisHelper = redisHelper;
         this.listenHelper = listenHelper;
         this.requester = requester;
     }
 
-    @Cacheable("wavyUser")
+    //@Cacheable("wavyUser")
     public WavyUser getById(long discordId) {
         WavyUser wavyUser = this.wavyUserRepository.findByUserDiscordId(discordId);
         if (wavyUser == null)
@@ -49,33 +46,20 @@ public class WavyUserService {
         return wavyUser;
     }
 
-    @CachePut("wavyUser")
-    public WavyUser insert(WavyUser wavyUser) {
-        return this.wavyUserRepository.insert(wavyUser);
-    }
-
-    @CachePut("wavyUser")
+    //@CachePut("wavyUser")
     public WavyUser save(WavyUser wavyUser) {
         return this.wavyUserRepository.save(wavyUser);
     }
 
-    public Task<Set<WavyListenDto>> updateUserListens(WavyUser user) {
-        MusicData musicData;
-        try {
-            musicData = this.musicDataService.getByDiscordId(user.getUser());
-        } catch (ResponseStatusException ex) {
-            if (ex.getRawStatusCode() == 404)
-                musicData = this.musicDataService.create(user.getWavyUuid(), user.getUser());
-            else
-                throw ex;
-        }
+    public Task<Set<WavyListenDto>> updateUserListens(WavyUser wavyUser) {
+        MusicData musicData = wavyUser.getMusicData();
         List<TrackListen> listens = musicData.getListens();
         if (listens.isEmpty())
-            return this.addAllListensForUser(user);
+            return this.addAllListensForUser(wavyUser);
         Collections.sort(listens);
         long mostRecentListenTimestamp = listens.get(0).getListenTime() + 1000; // Add 1000 as otherwise it'll include the most recent
-        Task<Set<WavyListenDto>> taskStatus = this.requester.retrieveListensSince(user.getWavyUuid(), mostRecentListenTimestamp);
-        this.addListens(taskStatus, user);
+        Task<Set<WavyListenDto>> taskStatus = this.requester.retrieveListensSince(wavyUser.getWavyUuid(), mostRecentListenTimestamp);
+        this.addListens(taskStatus, wavyUser);
         return taskStatus;
     }
 
@@ -88,7 +72,7 @@ public class WavyUserService {
     private void addListens(Task<Set<WavyListenDto>> taskStatus, WavyUser user) {
         taskStatus.getFuture().thenAccept(listenDtos -> {
             Set<TrackListen> listens = listenDtos.stream().map(WavyListenDto::toTrackListen).collect(Collectors.toSet());
-            MusicData musicData = this.musicDataService.getByDiscordId(user.getUser());
+            MusicData musicData = user.getMusicData();
             musicData.getListens().addAll(listens);
             listenDtos.stream().map(WavyListenDto::getTrack).map(WavyTrackDto::getId).forEach(id -> {
                 if (musicData.getTrackPlays().containsKey(id))
@@ -110,7 +94,7 @@ public class WavyUserService {
                         musicData.getArtistPlays().put(id, new AtomicInteger(1));
                 }
             });
-            this.musicDataService.save(musicData);
+            this.save(user);
             this.redisHelper.updateLeaderboards(user, musicData);
             listenDtos.forEach(this.listenHelper::processListen);
         });

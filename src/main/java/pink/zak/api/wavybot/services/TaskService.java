@@ -25,9 +25,8 @@ public class TaskService {
 
     public RedisTask getTaskById(UUID uuid) {
         Optional<RedisTask> optionalTask = this.redisTaskRepository.findById(uuid);
-        if (optionalTask.isEmpty()) {
+        if (optionalTask.isEmpty())
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found");
-        }
         return optionalTask.get();
     }
 

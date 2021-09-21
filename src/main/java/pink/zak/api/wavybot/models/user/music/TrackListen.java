@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.lang.NonNull;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -31,7 +30,7 @@ public class TrackListen implements Comparable<TrackListen> {
     private long listenTime;
 
     @Override
-    public int compareTo(@NonNull TrackListen o) {
+    public int compareTo(@NotNull TrackListen o) {
         return Long.compare(o.listenTime, this.listenTime);
     }
 }

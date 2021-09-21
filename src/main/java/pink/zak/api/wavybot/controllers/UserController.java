@@ -6,11 +6,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import pink.zak.api.wavybot.exceptions.RiptideStatusException;
 import pink.zak.api.wavybot.models.task.NewTaskResponse;
 import pink.zak.api.wavybot.models.user.User;
 import pink.zak.api.wavybot.models.user.WavyUser;
 import pink.zak.api.wavybot.models.user.music.MusicData;
-import pink.zak.api.wavybot.services.MusicDataService;
 import pink.zak.api.wavybot.services.UserService;
 import pink.zak.api.wavybot.services.WavyUserService;
 
@@ -19,13 +19,11 @@ import pink.zak.api.wavybot.services.WavyUserService;
 public class UserController {
     private final UserService userService;
     private final WavyUserService wavyUserService;
-    private final MusicDataService musicDataService;
 
     @Autowired
-    public UserController(UserService userService, WavyUserService wavyUserService, MusicDataService musicDataService) {
+    public UserController(UserService userService, WavyUserService wavyUserService) {
         this.userService = userService;
         this.wavyUserService = wavyUserService;
-        this.musicDataService = musicDataService;
     }
 
     @GetMapping("get")
@@ -40,7 +38,7 @@ public class UserController {
 
     @GetMapping("getMusicData")
     public MusicData getMusicData(@PathVariable long discordId) {
-        return this.musicDataService.getByDiscordId(discordId);
+        return this.getWavyUser(discordId).getMusicData();
     }
 
     @GetMapping("updateListens")
@@ -50,7 +48,7 @@ public class UserController {
     }
 
     @GetMapping("linkWavy")
-    public NewTaskResponse linkWavy(@PathVariable long discordId, @RequestParam String wavyUsername) {
+    public NewTaskResponse linkWavy(@PathVariable long discordId, @RequestParam String wavyUsername) throws RiptideStatusException {
         return this.userService.linkUser(wavyUsername, discordId).toResponse();
     }
 }
